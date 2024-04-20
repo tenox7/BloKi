@@ -272,10 +272,14 @@ func (hdl *SiteHandler) indexArticles() {
 
 // TODO: implement vintage, curl/lynx
 func vintage(ua string) string {
-	if strings.HasPrefix(ua, "Mozilla/5") {
+	switch {
+	case strings.HasPrefix(ua, "Mozilla/5"):
 		return "modern"
+	case strings.HasPrefix(ua, "Mozilla/4"):
+		return "legacy"
+	default:
+		return "vintage"
 	}
-	return "legacy"
 }
 
 func atoiOrZero(s string) int {
