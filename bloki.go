@@ -2,8 +2,6 @@
 package main
 
 // TODO:
-// - robots
-// - favicon
 // - user manager
 // - admin interface
 // - modern template
@@ -18,10 +16,13 @@ package main
 // - articles could be array / range
 // - service files, etc
 // - git integration
+// - make favicon configurable
+// - make robots.txt configurable
 
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
 	"io"
 	"log"
 	"math"
@@ -225,6 +226,11 @@ func serveFavicon(w http.ResponseWriter, r *http.Request) {
 	w.Write(favIcon)
 }
 
+func serveRobots(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(w, "User-agent: *\nAllow: /\n")
+}
+
 func (hdl *SiteHandler) indexArticles() {
 	d, err := os.ReadDir(path.Join(*rootDir, "articles"))
 	if err != nil {
@@ -409,6 +415,7 @@ func main() {
 	// http(s) bind stuff
 	http.Handle("/", hdl)
 	http.HandleFunc("/favicon.ico", serveFavicon)
+	http.HandleFunc("/robots.txt", serveRobots)
 
 	if *acmBind != "" && *secrets != "" && len(acmWhLst) > 0 {
 		https := &http.Server{
