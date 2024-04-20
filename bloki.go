@@ -2,6 +2,7 @@
 package main
 
 // TODO:
+// - preload templates and favicon at build
 // - user manager
 // - admin interface
 // - modern template
@@ -50,11 +51,10 @@ import (
 )
 
 var (
-	timeFormat      = "2006-01-02 15:04"
-	statusPublished = []byte("[//]: # (published=")
-	publishedRe     = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
-	authorRe        = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
-	charset         = map[bool]string{
+	timeFormat  = "2006-01-02 15:04"
+	publishedRe = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
+	authorRe    = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
+	charset     = map[bool]string{
 		true:  "UTF-8",
 		false: "ISO-8859-1",
 	}
@@ -63,7 +63,6 @@ var (
 
 var (
 	siteName = flag.String("site_name", "My Blog", "Name your blog")
-	siteType = flag.String("site_type", "blog", "blog or wiki")
 	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
 	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
 	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
