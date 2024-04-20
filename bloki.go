@@ -59,6 +59,7 @@ var (
 		true:  "UTF-8",
 		false: "ISO-8859-1",
 	}
+	favIcon []byte
 )
 
 var (
@@ -176,6 +177,7 @@ func (t *TemplateData) paginateArticles(pg, pl, app int, idx *[]string) {
 }
 
 func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+
 	log.Printf("req from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
@@ -216,6 +218,11 @@ func serveMedia(w http.ResponseWriter, fName string) {
 	}
 	w.Header().Set("Content-Type", http.DetectContentType(f))
 	w.Write(f)
+}
+
+func serveFavicon(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "image/x-icon")
+	w.Write(favIcon)
 }
 
 func (hdl *SiteHandler) indexArticles() {
@@ -392,12 +399,16 @@ func main() {
 		hdl.Templates[t] = tpl
 	}
 
+	// favicon.ico
+	// TODO: make this configurable
+	favIcon, _ = os.ReadFile(path.Join(*rootDir, "favicon.ico"))
+
 	// index articles
 	hdl.indexArticles()
 
 	// http(s) bind stuff
 	http.Handle("/", hdl)
-	http.Handle("/favicon.ico", http.NotFoundHandler())
+	http.HandleFunc("/favicon.ico", serveFavicon)
 
 	if *acmBind != "" && *secrets != "" && len(acmWhLst) > 0 {
 		https := &http.Server{
