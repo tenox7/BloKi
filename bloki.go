@@ -65,6 +65,8 @@ var (
 	siteName = flag.String("site_name", "My Blog", "Name your blog")
 	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
 	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
+	postsDir = flag.String("posts_subdir", "posts/", "directory holding user posts, relative to root dir")
+	mediaDir = flag.String("media_subdir", "media/", "directory holding user media, relative to root dir")
 	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
 	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
 	suidUser = flag.String("setuid", "", "Username to setuid to if started as root")
@@ -121,7 +123,7 @@ func renderError(name, errStr string) string {
 }
 
 func (t *TemplateData) renderArticle(name string) {
-	fp := path.Join(*rootDir, "articles", name)
+	fp := path.Join(*rootDir, *postsDir, name)
 	article, err := os.ReadFile(fp)
 	if err != nil {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
@@ -204,7 +206,7 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveMedia(w http.ResponseWriter, fName string) {
-	f, err := os.ReadFile(filepath.Join(*rootDir, "media", fName))
+	f, err := os.ReadFile(filepath.Join(*rootDir, *mediaDir, fName))
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
 		io.WriteString(w, "error")
@@ -226,7 +228,7 @@ func serveRobots(w http.ResponseWriter, r *http.Request) {
 }
 
 func (hdl *SiteHandler) indexArticles() {
-	d, err := os.ReadDir(path.Join(*rootDir, "articles"))
+	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -238,7 +240,7 @@ func (hdl *SiteHandler) indexArticles() {
 			continue
 		}
 
-		a, err := os.ReadFile(path.Join(*rootDir, "articles", f.Name()))
+		a, err := os.ReadFile(path.Join(*rootDir, *postsDir, f.Name()))
 		if err != nil {
 			log.Printf("error reading %v: %v", f.Name(), err)
 			continue
@@ -261,7 +263,7 @@ func (hdl *SiteHandler) indexArticles() {
 		return birth[seq[j]].Before(birth[seq[i]])
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
-	log.Printf("parsed %v articles sequenced: %+v, last page is %v", len(seq), seq, pgMax)
+	log.Printf("indexed %v articles, sequenced: %+v, last page is %v", len(seq), seq, pgMax)
 	hdl.Lock()
 	defer hdl.Unlock()
 	hdl.Index = seq
