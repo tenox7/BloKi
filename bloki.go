@@ -51,10 +51,10 @@ import (
 )
 
 var (
+	timeFormat      = "2006-01-02 15:04"
 	statusPublished = []byte("[//]: # (published=")
-	publishedRe     = regexp.MustCompile(`\[//\]: # \(published=(\d+)\)`)
-	authorRe        = regexp.MustCompile(`\[//\]: # \(author=(\w+)\)`)
-	timeFormat      = time.DateOnly
+	publishedRe     = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
+	authorRe        = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
 	charset         = map[bool]string{
 		true:  "UTF-8",
 		false: "ISO-8859-1",
@@ -143,11 +143,11 @@ func (t *TemplateData) renderArticle(name string) {
 	if len(m) < 1 {
 		m = [][]byte{[]byte(""), []byte("")}
 	}
-	p, _ := strconv.ParseInt(string(m[1]), 10, 64)
+	published, err := time.Parse(timeFormat, string(m[1]))
 	if err != nil {
-		p = 0
+		log.Printf("Unable to parse publication date in %q: %v", name, err)
+		published = time.Unix(0, 0)
 	}
-	published := time.Unix(p, 0)
 
 	author := authorRe.FindSubmatch(article)
 	if len(author) < 2 {
@@ -242,12 +242,12 @@ func (hdl *SiteHandler) indexArticles() {
 		if len(m) < 1 {
 			continue
 		}
-		p, err := strconv.ParseInt(string(m[1]), 10, 64)
+		t, err := time.Parse(timeFormat, string(m[1]))
 		if err != nil {
-			log.Printf("error parsing publication date in %v: %v", f.Name(), err)
+			log.Printf("Unable to parse publication date in %q: %v", f.Name(), err)
 			continue
 		}
-		birth[f.Name()] = time.Unix(p, 0)
+		birth[f.Name()] = t
 		seq = append(seq, f.Name())
 	}
 	sort.Slice(seq, func(i, j int) bool {
