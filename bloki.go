@@ -81,7 +81,6 @@ type SiteHandler struct {
 	}
 	Templates map[string]*template.Template
 	Index     []string
-	Articles  string
 	PageLast  int
 
 	sync.Mutex
