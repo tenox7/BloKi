@@ -378,6 +378,26 @@ func main() {
 		log.Printf("Setuid UID=%d GID=%d", os.Geteuid(), os.Getgid())
 	}
 
+	// check articles & media
+	st, err := os.Stat(path.Join(*rootDir, *postsDir))
+	if os.IsNotExist(err) {
+		log.Print("articles did not exist, creating")
+		err = os.Mkdir(path.Join(*rootDir, *postsDir), 0755)
+		if err != nil {
+			log.Fatalf("Unable to create articles directory: %v", err)
+		}
+		err = os.WriteFile(
+			path.Join(*rootDir, *postsDir, "my-first-post.md"),
+			[]byte("[//]: # (published="+time.Now().Format(timeFormat)+")\n\n# My first blog post!\n\nHello World!\n\n"),
+			0644,
+		)
+		if err != nil {
+			log.Fatalf("Unable to create first post: %v", err)
+		}
+	} else if !st.IsDir() {
+		log.Fatalf("%v is a file", path.Join(*rootDir, *postsDir))
+	}
+
 	// load templates
 	hdl := &SiteHandler{
 		Templates: make(map[string]*template.Template),
