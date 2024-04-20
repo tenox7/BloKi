@@ -90,9 +90,9 @@ type TemplateData struct {
 	CharSet   string
 	Paginator string
 	Page      int
-	PagePrev  int
-	PageNext  int
-	PageLast  int
+	PgNewer   int
+	PgOlder   int
+	PgOldest  int
 }
 
 func renderMd(md []byte, name string) string {
@@ -164,9 +164,9 @@ func (t *TemplateData) renderArticle(name string) {
 
 func (t *TemplateData) paginateArticles(pg, pl, app int, idx *[]string) {
 	t.Page = pg
-	t.PageNext = pg + 1
-	t.PagePrev = pg - 1
-	t.PageLast = pl
+	t.PgOlder = pg + 1
+	t.PgNewer = pg - 1
+	t.PgOldest = pl
 	index := *idx
 	for i := t.Page * app; i < (t.Page+1)*app && i < len(index); i++ {
 		t.renderArticle(index[i])
