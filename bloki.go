@@ -178,7 +178,7 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("req from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
-	if strings.HasSuffix(fi, ".png") || strings.HasSuffix(fi, ".jpg") {
+	if strings.HasSuffix(fi, ".png") || strings.HasSuffix(fi, ".jpg") || strings.HasSuffix(fi, ".gif") {
 		serveMedia(w, fi)
 		return
 	}
