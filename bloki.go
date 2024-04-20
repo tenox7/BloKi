@@ -391,15 +391,20 @@ func main() {
 	// index articles
 	hdl.indexArticles()
 
-	// favicon.ico
-	// TODO: make this configurable
-	favIcon, _ = os.ReadFile(path.Join(*rootDir, "favicon.ico"))
-
-	// http(s) bind stuff
+	// http handlers
 	http.Handle("/", hdl)
-	http.HandleFunc("/favicon.ico", serveFavicon)
 	http.HandleFunc("/robots.txt", serveRobots)
 
+	// favicon
+	favIcon, err = os.ReadFile(path.Join(*rootDir, "favicon.ico"))
+	if err != nil || len(favIcon) == 0 {
+		log.Print("favicon.ico not found")
+		http.HandleFunc("/favicon.ico", http.NotFound)
+	} else {
+		http.HandleFunc("/favicon.ico", serveFavicon)
+	}
+
+	// http(s) bind stuff
 	if *acmBind != "" && *secrets != "" && len(acmWhLst) > 0 {
 		https := &http.Server{
 			Addr:      *bindAddr,
