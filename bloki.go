@@ -47,8 +47,6 @@ import (
 	"github.com/gomarkdown/markdown/parser"
 	"github.com/tenox7/tkvs"
 	"golang.org/x/crypto/acme/autocert"
-
-	"gopkg.in/ini.v1"
 )
 
 var (
@@ -64,6 +62,9 @@ var (
 )
 
 var (
+	siteName = flag.String("site_name", "My Blog", "Name your blog")
+	siteType = flag.String("site_type", "blog", "blog or wiki")
+	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
 	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
 	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
 	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
@@ -74,11 +75,6 @@ var (
 )
 
 type SiteHandler struct {
-	ConfigIni struct {
-		SiteName        string
-		SiteType        string
-		ArticlesPerPage int
-	}
 	Templates map[string]*template.Template
 	Index     []string
 	PageLast  int
@@ -187,7 +183,7 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	td := TemplateData{
-		SiteName: h.ConfigIni.SiteName,
+		SiteName: *siteName,
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 		Template: h.Templates[vintage(r.UserAgent())],
 	}
@@ -197,7 +193,7 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		td.renderArticle(fi + ".md")
 	default:
 		r.ParseForm()
-		td.paginateArticles(atoiOrZero(r.FormValue("pg")), h.PageLast, h.ConfigIni.ArticlesPerPage, &h.Index)
+		td.paginateArticles(atoiOrZero(r.FormValue("pg")), h.PageLast, *artPerPg, &h.Index)
 	}
 
 	w.Header().Set("Content-Type", "text/html")
@@ -265,7 +261,7 @@ func (hdl *SiteHandler) indexArticles() {
 	sort.Slice(seq, func(i, j int) bool {
 		return birth[seq[j]].Before(birth[seq[i]])
 	})
-	pgMax := int(math.Ceil(float64(len(seq))/float64(hdl.ConfigIni.ArticlesPerPage)) - 1)
+	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
 	log.Printf("parsed %v articles sequenced: %+v, last page is %v", len(seq), seq, pgMax)
 	hdl.Lock()
 	defer hdl.Unlock()
@@ -381,21 +377,10 @@ func main() {
 		log.Printf("Setuid UID=%d GID=%d", os.Geteuid(), os.Getgid())
 	}
 
-	// load config.ini
-	i, err := ini.Load(path.Join(*rootDir, "config.ini"))
-	if err != nil {
-		log.Fatal("unable to process config.ini: ", err)
-	}
-
-	hdl := &SiteHandler{}
-	err = i.MapTo(&hdl.ConfigIni)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("Config.ini: %+v", hdl.ConfigIni)
-
 	// load templates
-	hdl.Templates = make(map[string]*template.Template)
+	hdl := &SiteHandler{
+		Templates: make(map[string]*template.Template),
+	}
 	for _, t := range []string{"vintage", "legacy", "modern"} {
 		tpl, err := template.ParseFiles(path.Join(*rootDir, "templates", t+".html"))
 		if err != nil {
@@ -404,12 +389,12 @@ func main() {
 		hdl.Templates[t] = tpl
 	}
 
+	// index articles
+	hdl.indexArticles()
+
 	// favicon.ico
 	// TODO: make this configurable
 	favIcon, _ = os.ReadFile(path.Join(*rootDir, "favicon.ico"))
-
-	// index articles
-	hdl.indexArticles()
 
 	// http(s) bind stuff
 	http.Handle("/", hdl)
