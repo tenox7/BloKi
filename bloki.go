@@ -182,7 +182,6 @@ func (t *TemplateData) paginateArticles(pg, pl, app int, idx *[]string) {
 }
 
 func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-
 	log.Printf("req from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
