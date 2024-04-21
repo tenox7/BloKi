@@ -444,11 +444,6 @@ func main() {
 	// index articles
 	hdl.indexArticles()
 
-	// http handlers
-	http.Handle("/", hdl)
-	http.HandleFunc("/robots.txt", serveRobots)
-	http.HandleFunc("/favicon.ico", serveFavicon)
-
 	// favicon
 	fst, err := os.Stat(path.Join(*rootDir, "favicon.ico"))
 	if err == nil && !fst.IsDir() {
@@ -458,6 +453,11 @@ func main() {
 			log.Print("Loaded local favicon.ico")
 		}
 	}
+
+	// http handlers
+	http.Handle("/", hdl)
+	http.HandleFunc("/robots.txt", serveRobots)
+	http.HandleFunc("/favicon.ico", serveFavicon)
 
 	// http(s) bind stuff
 	if *acmBind != "" && *secrets != "" && len(acmWhLst) > 0 {
