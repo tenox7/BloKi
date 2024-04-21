@@ -1,0 +1,44 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML LANG="en">
+    <HEAD>
+        <META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset={{.CharSet}}">
+        <META HTTP-EQUIV="Content-Language" CONTENT="en-US">
+        <META HTTP-EQUIV="google" CONTENT="notranslate">
+        <META HTTP-EQUIV="charset" CONTENT="{{.CharSet}}">
+        <META HTTP-EQUIV="encoding" CONTENT="{{.CharSet}}">
+        <META NAME="viewport" CONTENT="width=device-width">
+        <LINK REL="icon" TYPE="image/x-icon" HREF="/favicon.ico">
+        <LINK REL="shortcut icon" HREF="/favicon.ico">
+        <TITLE>{{.SiteName}}</TITLE>
+        <STYLE TYPE="text/css"><!--
+            A:link {text-decoration: none; color:#0033CC; }
+            A:visited {text-decoration: none; color:#0033CC; }
+            A:active {text-decoration: none; color:#FF0000; }
+            A:hover {text-decoration: none; color: #FF9900; background-color: #FFFFFF; }
+            html, body, table { margin:0px; padding-top: 10px; padding-left:40px; padding-right: 40px; border:none;  }
+            td, th { font-family: Tahoma, Arial, Geneva, sans-serif; font-size:13px;  border:none; }
+            input { font-family: Tahoma, Arial, Geneva, sans-serif; font-size:13px; }
+        --></STYLE>
+    </HEAD>
+    <BODY BGCOLOR="#FFFFFF">
+        <TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="40" CELLSPACING="0" BORDER="0">
+            <TR BGCOLOR="#0099FF">
+                <TD HEIGHT="100" COLSPAN="2">
+                    <H1 STYLE="color: #FFFFFF; font-size: 40px;">{{.SiteName}}</H1>
+                </TD>
+            </TR>
+            <TR>
+                <TD WIDTH="80%" VALIGN="top">
+                    <A HREF="/">Home</A> |
+{{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
+{{ .Articles }}   
+{{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}
+                </TD>
+                <TD WIDTH="20%" VALIGN="top">
+                    Tools
+                </TD>
+            </TR>
+            <TR><TD COLSPAN="2">Copyright &copy; by Authors of {{.SiteName}}. Best viewed in Netscape Navigator 4.x! | BloKi Legacy Template</TD></TR>
+        </TABLE>
+    </BODY>
+</HTML>

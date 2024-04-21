@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Language" content="en-US">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>{{.SiteName}}</title>
+    <style>
+        body { margin: 0; padding-top: 10px; padding-left: 40px; padding-right: 40px; font-family: Tahoma, Arial, Geneva, sans-serif; font-size: 13px; }
+        a:link, a:visited { text-decoration: none; color: #0000CE; }
+        a:active { text-decoration: none; color: #FF0000; }
+        a:hover { text-decoration: none; color: #FF8000; background-color: #FFFFFF; }
+        .header { background-color: #45A6DA; text-align: center; padding: 20px; }
+        .header h1 { color: #FFFFFF; font-size: 40px; }
+        .main-content { display: flex; justify-content: space-between; margin-top: 20px; }
+        .articles { width: 65%; padding: 20px; }
+        .tools { width: 20%; background-color: #FAFAFA; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>{{.SiteName}}</h1>
+    </div>
+    <div class="main-content">
+        <div class="articles">
+            <a href="/">Home</a> |
+            {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
+            {{.Articles}}   
+            {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}
+        </div>
+        <div class="tools">
+            tools
+        </div>
+    </div>
+    <div>
+        Copyright &copy; by authors of the {{.SiteName}} | <a href="https://github.com/tenox7/BloKi">BloKi</a> Modern Template
+    </div>
+</body>
+</html>

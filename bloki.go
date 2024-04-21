@@ -22,6 +22,7 @@ package main
 
 import (
 	"crypto/tls"
+	"embed"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -62,6 +63,9 @@ var (
 
 	//go:embed favicon.ico
 	favIcon []byte
+
+	//go:embed templates/*.html
+	templateFS embed.FS
 )
 
 var (
@@ -70,6 +74,7 @@ var (
 	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
 	postsDir = flag.String("posts_subdir", "posts/", "directory holding user posts, relative to root dir")
 	mediaDir = flag.String("media_subdir", "media/", "directory holding user media, relative to root dir")
+	htmplDir = flag.String("template_subdir", "templates/", "directory holding html templates, relative to root dir")
 	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
 	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
 	suidUser = flag.String("setuid", "", "Username to setuid to if started as root")
@@ -423,11 +428,17 @@ func main() {
 
 	// load templates
 	for _, t := range []string{"vintage", "legacy", "modern"} {
-		tpl, err := template.ParseFiles(path.Join(*rootDir, "templates", t+".html"))
-		if err != nil {
-			log.Fatal(err)
+		tpl, err := template.ParseFiles(path.Join(*rootDir, *htmplDir, t+".html"))
+		if err == nil {
+			hdl.Templates[t] = tpl
+			log.Printf("Loaded template %q from disk", t)
+		} else {
+			hdl.Templates[t], err = template.ParseFS(templateFS, *htmplDir+t+".html")
+			if err != nil {
+				log.Fatalf("error parsing embedded template %q: %v", t, err)
+			}
+			log.Printf("Loaded template %q from embed.FS", t)
 		}
-		hdl.Templates[t] = tpl
 	}
 
 	// index articles

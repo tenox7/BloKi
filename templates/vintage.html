@@ -1,0 +1,24 @@
+<HTML>
+    <HEAD>
+        <TITLE>{{.SiteName}}</TITLE>
+    </HEAD>
+    <BODY BGCOLOR="#FFFFFF">
+        <TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="40" CELLSPACING="0" BORDER="0">
+            <TR BGCOLOR="#45A6DA">
+                <TD HEIGHT="100">
+                    <H1>{{.SiteName}}</H1>
+                </TD>
+            </TR>
+            <TR>
+                <TD WIDTH="80%">
+                    <A HREF="/">Home</A> |
+{{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
+{{.Articles}}   
+{{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}
+                </TD>
+                <TD WIDTH="20%" BGCOLOR="#FAFAFA" VALIGN="top">Tools</TD>
+            </TR>
+            <TR><TD COLSPAN="2">>Copyright &copy; by Authors of {{.SiteName}}. Best viewed in NCSA Mosaic! | BloKi Vintage Template</TD></TR>
+        </TABLE>
+    </BODY>
+</HTML>
