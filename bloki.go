@@ -5,6 +5,7 @@ package main
 // - user manager
 // - admin interface
 // - modern template
+// - comments
 // - s3 support
 // - render to
 // - throttle
@@ -427,10 +428,11 @@ func main() {
 	// load templates
 	for _, t := range []string{"vintage", "legacy", "modern"} {
 		tpl, err := template.ParseFiles(path.Join(*rootDir, *htmplDir, t+".html"))
-		if err == nil {
+		switch err {
+		case nil:
 			hdl.Templates[t] = tpl
 			log.Printf("Loaded template %q from disk", t)
-		} else {
+		default:
 			hdl.Templates[t], err = template.ParseFS(templateFS, *htmplDir+t+".html")
 			if err != nil {
 				log.Fatalf("error parsing embedded template %q: %v", t, err)
