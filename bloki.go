@@ -76,9 +76,10 @@ var (
 )
 
 type SiteHandler struct {
-	Templates map[string]*template.Template
-	Index     []string
-	PageLast  int
+	Templates    map[string]*template.Template
+	Index        []string
+	PageLast     int
+	SecretsStore *tkvs.KVS
 
 	sync.Mutex
 }
@@ -335,16 +336,15 @@ func (z *multiString) Set(v string) error {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Print("Starting up...")
-	var err error
 	acm := autocert.Manager{Prompt: autocert.AcceptTOS}
+	hdl := &SiteHandler{Templates: make(map[string]*template.Template)}
+	var err error
 	flag.Var(&acmWhLst, "acm_host", "autocert manager allowed hostname (multi)")
 	flag.Parse()
 
 	// open secrets before chroot
 	if *secrets != "" {
-		acm.Cache = tkvs.NewJsonCache(*secrets, autocert.ErrCacheMiss)
-		acm.HostPolicy = autocert.HostWhitelist(acmWhLst...)
-		go http.ListenAndServe(*acmBind, acm.HTTPHandler(nil))
+		hdl.SecretsStore = tkvs.NewJsonCache(*secrets, autocert.ErrCacheMiss)
 	}
 
 	// find uid/gid for setuid before chroot
@@ -372,6 +372,23 @@ func main() {
 		log.Fatalf("unable to listen on %v: %v", *bindAddr, err)
 	}
 	log.Printf("Listening on %q", *bindAddr)
+
+	// auto cert startup
+	if *acmBind != "" && len(acmWhLst) > 0 && hdl.SecretsStore != nil {
+		acm.Cache = hdl.SecretsStore
+		acm.HostPolicy = autocert.HostWhitelist(acmWhLst...)
+		al, err := net.Listen("tcp", *acmBind)
+		if err != nil {
+			log.Fatalf("unable to listen on %v: %v", *acmBind, err)
+		}
+		log.Printf("Starting ACME HTTP server on %v", *acmBind)
+		go func() {
+			err = http.Serve(al, acm.HTTPHandler(hdl))
+			if err != nil {
+				log.Fatalf("unable to start acme http: %v", err)
+			}
+		}()
+	}
 
 	// setuid now
 	if *suidUser != "" {
@@ -403,9 +420,6 @@ func main() {
 	}
 
 	// load templates
-	hdl := &SiteHandler{
-		Templates: make(map[string]*template.Template),
-	}
 	for _, t := range []string{"vintage", "legacy", "modern"} {
 		tpl, err := template.ParseFiles(path.Join(*rootDir, "templates", t+".html"))
 		if err != nil {
@@ -437,7 +451,7 @@ func main() {
 			Handler:   http.DefaultServeMux,
 			TLSConfig: &tls.Config{GetCertificate: acm.GetCertificate},
 		}
-		log.Print("Starting HTTPS TLS Server with ACM")
+		log.Print("Starting HTTPS TLS Server with ACM on ", *bindAddr)
 		err = https.ServeTLS(l, "", "")
 	} else {
 		log.Print("Starting plain HTTP Server")
