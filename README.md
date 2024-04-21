@@ -18,7 +18,8 @@ If you want an ultra small, simple, easy to use, high performance, micro blog/wi
 ## Current status
 
 - Blog engine works if articles and media are created on a disk by hand
-- Admin interface is coming up next
+- You can see working example [here](https://blog.tenox.net/)
+- The admin interface and user comments interface are coming up next
 
 Development progress can be tracked on [dogfood blog](https://blog.tenox.net/)
 

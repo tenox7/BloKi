@@ -2,8 +2,9 @@
 package main
 
 // TODO:
-// - user manager
 // - admin interface
+// - 2fa for admin login
+// - user manager
 // - modern template
 // - comments
 // - s3 support
