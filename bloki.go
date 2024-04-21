@@ -23,7 +23,6 @@ package main
 import (
 	"crypto/tls"
 	"embed"
-	_ "embed"
 	"flag"
 	"fmt"
 	"io"
