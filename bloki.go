@@ -22,6 +22,7 @@ package main
 
 import (
 	"crypto/tls"
+	_ "embed"
 	"flag"
 	"fmt"
 	"io"
@@ -58,6 +59,8 @@ var (
 		true:  "UTF-8",
 		false: "ISO-8859-1",
 	}
+
+	//go:embed favicon.ico
 	favIcon []byte
 )
 
@@ -434,14 +437,16 @@ func main() {
 	// http handlers
 	http.Handle("/", hdl)
 	http.HandleFunc("/robots.txt", serveRobots)
+	http.HandleFunc("/favicon.ico", serveFavicon)
 
 	// favicon
-	favIcon, err = os.ReadFile(path.Join(*rootDir, "favicon.ico"))
-	if err != nil || len(favIcon) == 0 {
-		log.Print("favicon.ico not found")
-		http.HandleFunc("/favicon.ico", http.NotFound)
-	} else {
-		http.HandleFunc("/favicon.ico", serveFavicon)
+	fst, err := os.Stat(path.Join(*rootDir, "favicon.ico"))
+	if err == nil && !fst.IsDir() {
+		f, err := os.ReadFile(path.Join(*rootDir, "favicon.ico"))
+		if err == nil || len(f) > 0 {
+			favIcon = f
+			log.Print("Loaded local favicon.ico")
+		}
 	}
 
 	// http(s) bind stuff
