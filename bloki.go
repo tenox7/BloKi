@@ -103,7 +103,6 @@ func renderMd(md []byte, name string) string {
 	p := parser.NewWithExtensions(parser.CommonExtensions | parser.Autolink)
 	d := p.Parse(md)
 	r := html.NewRenderer(html.RendererOptions{
-		Flags: html.CommonFlags,
 		RenderNodeHook: func() html.RenderNodeFunc {
 			return func(w io.Writer, node ast.Node, entering bool) (ast.WalkStatus, bool) {
 				if h, ok := node.(*ast.Heading); !ok || h.Level != 1 {
