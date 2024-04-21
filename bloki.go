@@ -2,7 +2,6 @@
 package main
 
 // TODO:
-// - preload templates and favicon at build
 // - user manager
 // - admin interface
 // - modern template
