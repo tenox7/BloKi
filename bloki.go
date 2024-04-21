@@ -185,11 +185,6 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	log.Printf("req from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
-	if strings.HasSuffix(fi, ".png") || strings.HasSuffix(fi, ".jpg") || strings.HasSuffix(fi, ".gif") {
-		serveMedia(w, fi)
-		return
-	}
-
 	td := TemplateData{
 		SiteName: *siteName,
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
@@ -212,8 +207,8 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serveMedia(w http.ResponseWriter, fName string) {
-	f, err := os.ReadFile(filepath.Join(*rootDir, *mediaDir, fName))
+func serveMedia(w http.ResponseWriter, r *http.Request) {
+	f, err := os.ReadFile(filepath.Join(*rootDir, *mediaDir, path.Base(r.URL.Path)))
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
 		io.WriteString(w, "error")
@@ -351,6 +346,7 @@ func main() {
 	hdl := &SiteHandler{Templates: make(map[string]*template.Template)}
 
 	http.Handle("/", hdl)
+	http.HandleFunc("/media/", serveMedia)
 	http.HandleFunc("/bk-admin", serveAdmin)
 	http.HandleFunc("/robots.txt", serveRobots)
 	http.HandleFunc("/favicon.ico", serveFavicon)
