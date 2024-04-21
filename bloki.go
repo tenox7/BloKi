@@ -6,9 +6,10 @@ package main
 // - 2fa for admin login
 // - user manager
 // - modern template
-// - comments
+// - render node hook for /media/
+// - user comments
 // - s3 support
-// - render to
+// - render to static site
 // - throttle
 // - fastcgi
 // - wiki mode
@@ -20,6 +21,10 @@ package main
 // - git integration
 // - make favicon configurable
 // - make robots.txt configurable
+// - service files
+// - docker container
+// - cloud run, fargate
+// - lambda, cloud functions
 
 import (
 	"crypto/tls"
