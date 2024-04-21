@@ -342,11 +342,18 @@ func (z *multiString) Set(v string) error {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Print("Starting up...")
-	acm := autocert.Manager{Prompt: autocert.AcceptTOS}
-	hdl := &SiteHandler{Templates: make(map[string]*template.Template)}
 	var err error
 	flag.Var(&acmWhLst, "acm_host", "autocert manager allowed hostname (multi)")
 	flag.Parse()
+
+	// http handlers
+	acm := autocert.Manager{Prompt: autocert.AcceptTOS}
+	hdl := &SiteHandler{Templates: make(map[string]*template.Template)}
+
+	http.Handle("/", hdl)
+	http.HandleFunc("/bk-admin", serveAdmin)
+	http.HandleFunc("/robots.txt", serveRobots)
+	http.HandleFunc("/favicon.ico", serveFavicon)
 
 	// open secrets before chroot
 	if *secrets != "" {
@@ -389,7 +396,7 @@ func main() {
 		}
 		log.Printf("Starting ACME HTTP server on %v", *acmBind)
 		go func() {
-			err = http.Serve(al, acm.HTTPHandler(hdl))
+			err = http.Serve(al, acm.HTTPHandler(http.DefaultServeMux))
 			if err != nil {
 				log.Fatalf("unable to start acme http: %v", err)
 			}
@@ -453,11 +460,6 @@ func main() {
 			log.Print("Loaded local favicon.ico")
 		}
 	}
-
-	// http handlers
-	http.Handle("/", hdl)
-	http.HandleFunc("/robots.txt", serveRobots)
-	http.HandleFunc("/favicon.ico", serveFavicon)
 
 	// http(s) bind stuff
 	if *acmBind != "" && *secrets != "" && len(acmWhLst) > 0 {
