@@ -2,29 +2,31 @@
 package main
 
 // TODO:
-// - admin interface
-// - 2fa for admin login
-// - user manager
-// - modern template
-// - render node hook for /media/
-// - user comments
-// - s3 support
-// - render to static site
-// - throttle
-// - fastcgi
-// - wiki mode
-// - startup wizard
-// - statistics module, page views, latencies, etc
-// - article footer/header should be customizable, a template?
-// - articles could be array / range
-// - service files, etc
-// - git integration
-// - make favicon configurable
-// - make robots.txt configurable
-// - service files
-// - docker container
-// - cloud run, fargate
-// - lambda, cloud functions
+// admin interface
+// 2fa for admin login
+// user manager
+// modern template
+// render node hook for /media/
+// user comments
+// s3 support
+// render to static site
+// throttle
+// fastcgi
+// wiki mode
+// startup wizard
+// statistics module, page views, latencies, etc
+// article footer/header should be customizable, a template?
+// articles could be array / range
+// service files, etc
+// git integration
+// make favicon configurable
+// make robots.txt configurable
+// service files
+// docker container
+// cloud run, fargate
+// lambda, cloud functions
+// html.EscapeString() for filenames
+// better error handling, use string builder
 
 import (
 	"crypto/tls"
