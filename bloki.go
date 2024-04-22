@@ -78,6 +78,7 @@ var (
 var (
 	siteName = flag.String("site_name", "My Blog", "Name your blog")
 	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
+	adminUri = flag.String("admin_uri", "/bk-admin", "address of the admin interface")
 	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
 	postsDir = flag.String("posts_subdir", "posts/", "directory holding user posts, relative to root dir")
 	mediaDir = flag.String("media_subdir", "media/", "directory holding user media, relative to root dir")
@@ -354,7 +355,7 @@ func main() {
 
 	http.Handle("/", hdl)
 	http.HandleFunc("/media/", serveMedia)
-	http.HandleFunc("/bk-admin", serveAdmin)
+	// http.HandleFunc(*adminUri, serveAdmin)
 	http.HandleFunc("/robots.txt", serveRobots)
 	http.HandleFunc("/favicon.ico", serveFavicon)
 
