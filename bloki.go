@@ -60,6 +60,22 @@ import (
 )
 
 var (
+	siteName = flag.String("site_name", "My Blog", "Name your blog")
+	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
+	adminUri = flag.String("admin_uri", "/bk-admin/", "address of the admin interface")
+	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
+	postsDir = flag.String("posts_subdir", "posts/", "directory holding user posts, relative to root dir")
+	mediaDir = flag.String("media_subdir", "media/", "directory holding user media, relative to root dir")
+	htmplDir = flag.String("template_subdir", "templates/", "directory holding html templates, relative to root dir")
+	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
+	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
+	suidUser = flag.String("setuid", "", "Username to setuid to if started as root")
+	bindAddr = flag.String("addr", ":8080", "listener address, eg. :8080 or :443")
+	acmBind  = flag.String("acm_addr", "", "autocert manager listen address, eg: :80")
+	acmWhLst multiString
+)
+
+var (
 	timeFormat  = "2006-01-02 15:04"
 	publishedRe = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
 	authorRe    = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
@@ -73,31 +89,17 @@ var (
 
 	//go:embed templates/*.html
 	templateFS embed.FS
+
+	templates    map[string]*template.Template
+	idx          postIndex
+	secretsStore *tkvs.KVS
 )
 
-var (
-	siteName = flag.String("site_name", "My Blog", "Name your blog")
-	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
-	adminUri = flag.String("admin_uri", "/bk-admin", "address of the admin interface")
-	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
-	postsDir = flag.String("posts_subdir", "posts/", "directory holding user posts, relative to root dir")
-	mediaDir = flag.String("media_subdir", "media/", "directory holding user media, relative to root dir")
-	htmplDir = flag.String("template_subdir", "templates/", "directory holding html templates, relative to root dir")
-	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
-	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
-	suidUser = flag.String("setuid", "", "Username to setuid to if started as root")
-	bindAddr = flag.String("addr", ":8080", "listener address, eg. :8080 or :443")
-	acmBind  = flag.String("acm_addr", "", "autocert manager listen address, eg: :80")
-	acmWhLst multiString
-)
+type postIndex struct {
+	index    []string
+	pageLast int
 
-type SiteHandler struct {
-	Templates    map[string]*template.Template
-	Index        []string
-	PageLast     int
-	SecretsStore *tkvs.KVS
-
-	sync.Mutex
+	sync.RWMutex
 }
 
 type TemplateData struct {
@@ -136,6 +138,12 @@ func renderMd(md []byte, name string) string {
 
 func renderError(name, errStr string) string {
 	return string("Article " + name + " " + errStr + "<p>\n\n")
+}
+
+func fatalError(w http.ResponseWriter, m string) {
+	w.Header().Set("Content-Type", "text/plain")
+	io.WriteString(w, m)
+	log.Print("fatalError: ", m)
 }
 
 func (t *TemplateData) renderArticle(name string) {
@@ -178,25 +186,27 @@ func (t *TemplateData) renderArticle(name string) {
 	t.Articles += renderMd(article, strings.TrimSuffix(name, ".md"))
 }
 
-func (t *TemplateData) paginateArticles(pg, pl, app int, idx *[]string) {
+func (t *TemplateData) paginatePosts(pg int) {
+	idx.RLock()
+	defer idx.RUnlock()
 	t.Page = pg
 	t.PgOlder = pg + 1
 	t.PgNewer = pg - 1
-	t.PgOldest = pl
-	index := *idx
-	for i := t.Page * app; i < (t.Page+1)*app && i < len(index); i++ {
+	t.PgOldest = idx.pageLast
+	index := idx.index
+	for i := t.Page * (*artPerPg); i < (t.Page+1)*(*artPerPg) && i < len(index); i++ {
 		t.renderArticle(index[i])
 	}
 }
 
-func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func servePosts(w http.ResponseWriter, r *http.Request) {
 	log.Printf("req from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
 	td := TemplateData{
 		SiteName: *siteName,
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
-		Template: h.Templates[vintage(r.UserAgent())],
+		Template: templates[vintage(r.UserAgent())],
 	}
 
 	switch {
@@ -204,7 +214,7 @@ func (h *SiteHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		td.renderArticle(fi + ".md")
 	default:
 		r.ParseForm()
-		td.paginateArticles(atoiOrZero(r.FormValue("pg")), h.PageLast, *artPerPg, &h.Index)
+		td.paginatePosts(atoiOrZero(r.FormValue("pg")))
 	}
 
 	w.Header().Set("Content-Type", "text/html")
@@ -237,7 +247,7 @@ func serveRobots(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "User-agent: *\nAllow: /\n")
 }
 
-func (hdl *SiteHandler) indexArticles() {
+func indexArticles() {
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
 		log.Fatal(err)
@@ -274,13 +284,12 @@ func (hdl *SiteHandler) indexArticles() {
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
 	log.Printf("indexed %v articles, sequenced: %+v, last page is %v", len(seq), seq, pgMax)
-	hdl.Lock()
-	defer hdl.Unlock()
-	hdl.Index = seq
-	hdl.PageLast = pgMax
+	idx.Lock()
+	defer idx.Unlock()
+	idx.index = seq
+	idx.pageLast = pgMax
 }
 
-// TODO: implement vintage, curl/lynx
 func vintage(ua string) string {
 	switch {
 	case strings.HasPrefix(ua, "Mozilla/5"):
@@ -345,23 +354,22 @@ func (z *multiString) Set(v string) error {
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	log.Print("Starting up...")
+	acm := autocert.Manager{Prompt: autocert.AcceptTOS}
+	templates = make(map[string]*template.Template)
 	var err error
 	flag.Var(&acmWhLst, "acm_host", "autocert manager allowed hostname (multi)")
 	flag.Parse()
 
 	// http handlers
-	acm := autocert.Manager{Prompt: autocert.AcceptTOS}
-	hdl := &SiteHandler{Templates: make(map[string]*template.Template)}
-
-	http.Handle("/", hdl)
+	http.HandleFunc("/", servePosts)
 	http.HandleFunc("/media/", serveMedia)
-	// http.HandleFunc(*adminUri, serveAdmin)
+	//http.HandleFunc(*adminUri, serveAdmin)
 	http.HandleFunc("/robots.txt", serveRobots)
 	http.HandleFunc("/favicon.ico", serveFavicon)
 
 	// open secrets before chroot
 	if *secrets != "" {
-		hdl.SecretsStore = tkvs.NewJsonCache(*secrets, autocert.ErrCacheMiss)
+		secretsStore = tkvs.NewJsonCache(*secrets, autocert.ErrCacheMiss)
 	}
 
 	// find uid/gid for setuid before chroot
@@ -391,8 +399,8 @@ func main() {
 	log.Printf("Listening on %q", *bindAddr)
 
 	// auto cert startup
-	if *acmBind != "" && len(acmWhLst) > 0 && hdl.SecretsStore != nil {
-		acm.Cache = hdl.SecretsStore
+	if *acmBind != "" && len(acmWhLst) > 0 && secretsStore != nil {
+		acm.Cache = secretsStore
 		acm.HostPolicy = autocert.HostWhitelist(acmWhLst...)
 		al, err := net.Listen("tcp", *acmBind)
 		if err != nil {
@@ -441,10 +449,10 @@ func main() {
 		tpl, err := template.ParseFiles(path.Join(*rootDir, *htmplDir, t+".html"))
 		switch err {
 		case nil:
-			hdl.Templates[t] = tpl
+			templates[t] = tpl
 			log.Printf("Loaded template %q from disk", t)
 		default:
-			hdl.Templates[t], err = template.ParseFS(templateFS, *htmplDir+t+".html")
+			templates[t], err = template.ParseFS(templateFS, *htmplDir+t+".html")
 			if err != nil {
 				log.Fatalf("error parsing embedded template %q: %v", t, err)
 			}
@@ -453,7 +461,7 @@ func main() {
 	}
 
 	// index articles
-	hdl.indexArticles()
+	indexArticles()
 
 	// favicon
 	fst, err := os.Stat(path.Join(*rootDir, "favicon.ico"))
