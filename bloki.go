@@ -140,12 +140,6 @@ func renderError(name, errStr string) string {
 	return string("Article " + name + " " + errStr + "<p>\n\n")
 }
 
-func fatalError(w http.ResponseWriter, m string) {
-	w.Header().Set("Content-Type", "text/plain")
-	io.WriteString(w, m)
-	log.Print("fatalError: ", m)
-}
-
 func (t *TemplateData) renderArticle(name string) {
 	fp := path.Join(*rootDir, *postsDir, name)
 	article, err := os.ReadFile(fp)
