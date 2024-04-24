@@ -363,6 +363,9 @@ func main() {
 	// open secrets before chroot
 	if *secrets != "" {
 		secretsStore = tkvs.NewJsonCache(*secrets, autocert.ErrCacheMiss)
+		if secretsStore == nil {
+			log.Fatal("Unable to open secrets file")
+		}
 	}
 
 	// find uid/gid for setuid before chroot
