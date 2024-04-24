@@ -96,7 +96,8 @@ var (
 )
 
 type postIndex struct {
-	index    []string
+	index []string
+	// add a map with dates, author, tags, etc
 	pageLast int
 
 	sync.RWMutex
@@ -104,7 +105,6 @@ type postIndex struct {
 
 type TemplateData struct {
 	SiteName  string
-	Template  *template.Template
 	Articles  string
 	CharSet   string
 	Paginator string
@@ -206,7 +206,6 @@ func servePosts(w http.ResponseWriter, r *http.Request) {
 	td := TemplateData{
 		SiteName: *siteName,
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
-		Template: templates[vintage(r.UserAgent())],
 	}
 
 	switch {
@@ -218,7 +217,7 @@ func servePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	err := td.Template.Execute(w, td)
+	err := templates[vintage(r.UserAgent())].Execute(w, td)
 	if err != nil {
 		log.Print(err.Error())
 		io.WriteString(w, err.Error())
@@ -444,8 +443,8 @@ func main() {
 		log.Fatalf("%v is a file", path.Join(*rootDir, *postsDir))
 	}
 
-	// load templates
-	for _, t := range []string{"vintage", "legacy", "modern"} {
+	// load templates (this should be readdir from embed.FS)
+	for _, t := range []string{"vintage", "legacy", "modern", "admin"} {
 		tpl, err := template.ParseFiles(path.Join(*rootDir, *htmplDir, t+".html"))
 		switch err {
 		case nil:
