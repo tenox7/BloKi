@@ -247,19 +247,15 @@ func indexArticles() {
 	}
 	birth := make(map[string]time.Time)
 	seq := []string{}
-	log.Printf("Indexing %v articles...", len(d))
 	for _, f := range d {
 		if f.IsDir() || f.Name()[0:1] == "." || !strings.HasSuffix(f.Name(), ".md") {
 			continue
 		}
-
 		a, err := os.ReadFile(path.Join(*rootDir, *postsDir, f.Name()))
 		if err != nil {
 			log.Printf("error reading %v: %v", f.Name(), err)
 			continue
 		}
-		log.Printf("indexing file %q", f.Name())
-
 		m := publishedRe.FindSubmatch(a)
 		if len(m) < 1 {
 			continue
@@ -362,7 +358,7 @@ func main() {
 
 	// open secrets before chroot
 	if *secrets != "" {
-		secretsStore = tkvs.NewJsonCache(*secrets, autocert.ErrCacheMiss)
+		secretsStore = tkvs.New(*secrets, autocert.ErrCacheMiss)
 		if secretsStore == nil {
 			log.Fatal("Unable to open secrets file")
 		}
@@ -440,7 +436,7 @@ func main() {
 		log.Fatalf("%v is a file", path.Join(*rootDir, *postsDir))
 	}
 
-	// load templates (this should be readdir from embed.FS)
+	// load templates
 	for _, t := range []string{"vintage", "legacy", "modern", "admin"} {
 		tpl, err := template.ParseFiles(path.Join(*rootDir, *htmplDir, t+".html"))
 		switch err {
