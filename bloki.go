@@ -353,7 +353,7 @@ func main() {
 	// http handlers
 	http.HandleFunc("/", servePosts)
 	http.HandleFunc("/media/", serveMedia)
-	//http.HandleFunc(*adminUri, serveAdmin)
+	http.HandleFunc(*adminUri, serveAdmin)
 	http.HandleFunc("/robots.txt", serveRobots)
 	http.HandleFunc("/favicon.ico", serveFavicon)
 
