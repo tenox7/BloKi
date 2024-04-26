@@ -241,11 +241,12 @@ func serveRobots(w http.ResponseWriter, r *http.Request) {
 }
 
 func indexArticles() {
+	start := time.Now()
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
 		log.Fatal(err)
 	}
-	birth := make(map[string]time.Time)
+	published := make(map[string]time.Time)
 	seq := []string{}
 	for _, f := range d {
 		if f.IsDir() || f.Name()[0:1] == "." || !strings.HasSuffix(f.Name(), ".md") {
@@ -265,14 +266,14 @@ func indexArticles() {
 			log.Printf("Unable to parse publication date in %q: %v", f.Name(), err)
 			continue
 		}
-		birth[f.Name()] = t
+		published[f.Name()] = t
 		seq = append(seq, f.Name())
 	}
 	sort.Slice(seq, func(i, j int) bool {
-		return birth[seq[j]].Before(birth[seq[i]])
+		return published[seq[j]].Before(published[seq[i]])
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
-	log.Printf("indexed %v articles, sequenced: %+v, last page is %v", len(seq), seq, pgMax)
+	log.Printf("indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
 	idx.Lock()
 	defer idx.Unlock()
 	idx.index = seq
