@@ -365,6 +365,12 @@ func main() {
 		}
 	}
 
+	// manage users
+	if flag.Arg(0) == "user" {
+		manageUsers()
+		return
+	}
+
 	// find uid/gid for setuid before chroot
 	var suid, sgid int
 	if *suidUser != "" {
