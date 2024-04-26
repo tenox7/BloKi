@@ -27,6 +27,7 @@ package main
 // lambda, cloud functions
 // html.EscapeString() for filenames
 // better error handling, use string builder
+// index remake, add more info to index struct, less readdir
 
 import (
 	"crypto/tls"
@@ -389,6 +390,7 @@ func main() {
 		if secretsStore == nil {
 			log.Fatal("Unable to open secrets file")
 		}
+		log.Print("Opened secrets store")
 	}
 
 	// manage users
