@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<HTML LANG="en">
+<HEAD>
+<META HTTP-EQUIV="Content-Type" CONTENT="text/html;charset=UTF-8">
+<META HTTP-EQUIV="Content-Language" CONTENT="en-US">
+<META HTTP-EQUIV="google" CONTENT="notranslate">
+<META HTTP-EQUIV="charset" CONTENT="UTF-8">
+<META HTTP-EQUIV="encoding" CONTENT=UTF-8>
+<META NAME="viewport" CONTENT="width=device-width">
+<LINK REL="icon" TYPE="image/x-icon" HREF="/favicon.ico">
+<LINK REL="shortcut icon" HREF="/favicon.ico?">
+<TITLE>Admin : {{.SiteName}}</TITLE>
+<STYLE TYPE="text/css"><!--
+    A:link {text-decoration: none; color:#0000CE; }
+    A:visited {text-decoration: none; color:#0000CE; }
+    A:active {text-decoration: none; color:#FF0000; }
+    A:hover {text-decoration: none; background-color: #FF8000; color: #FFFFFF; }
+    html, body, table { margin:0px; padding:0px; border:none;  }
+    td, th { font-family: Tahoma, Arial, Geneva, sans-serif; font-size:13px; margin:0px; padding:2px; border:none; }
+    input { font-family: Tahoma, Arial, Geneva, sans-serif; font-size:13px; }
+    .tab { color:#FFFFFF; font-weight:bold; border-right: #FFFFFF; border-right-width: 1px; border-right-style: solid;}
+--></STYLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<FORM ACTION="/bk-admin/" METHOD="POST" ENCTYPE="multipart/form-data">
+<INPUT TYPE="hidden" NAME="sort" VALUE="">
+<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="0" CELLSPACING="0" BORDER="0" STYLE="height:28px;">
+    <TR>
+        <TD NOWRAP BGCOLOR="#FF8000" VALIGN="MIDDLE" ALIGN="LEFT" CLASS="tab">&nbsp;Posts&nbsp;</TD>
+        <TD NOWRAP BGCOLOR="#0080FF" VALIGN="MIDDLE" ALIGN="LEFT" CLASS="tab">&nbsp;Media&nbsp;</TD>
+        <TD NOWRAP BGCOLOR="#0080FF" VALIGN="MIDDLE" ALIGN="LEFT" CLASS="tab">&nbsp;Users&nbsp;</TD>
+        <TD NOWRAP BGCOLOR="#0080FF" VALIGN="MIDDLE" ALIGN="LEFT" CLASS="tab">&nbsp;Stats&nbsp;</TD>
+        <TD NOWRAP WIDTH="100%" BGCOLOR="#F0F0F0" VALIGN="MIDDLE" ALIGN="RIGHT" STYLE="color:#000000; white-space:nowrap">
+            BloKi Admin : {{.SiteName}} &nbsp;&nbsp;
+        </TD>
+    </TR>
+    <TR>
+</TABLE>
+{{.AdminTab}}
+</FORM></BODY></HTML>
