@@ -240,7 +240,7 @@ func serveRobots(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "User-agent: *\nAllow: /\n")
 }
 
-func indexArticles() {
+func (i *postIndex) indexArticles() {
 	start := time.Now()
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
@@ -274,10 +274,36 @@ func indexArticles() {
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
 	log.Printf("indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
-	idx.Lock()
-	defer idx.Unlock()
-	idx.index = seq
-	idx.pageLast = pgMax
+	i.Lock()
+	defer i.Unlock()
+	i.index = seq
+	i.pageLast = pgMax
+}
+
+func (i *postIndex) renamePost(old, new string) {
+	i.Lock()
+	defer i.Unlock()
+	for n, p := range i.index {
+		if p != old {
+			continue
+		}
+		i.index[n] = new
+	}
+	log.Printf("rename %q to %q, new index: %+v", old, new, i.index)
+}
+
+func (i *postIndex) deletePost(name string) {
+	i.Lock()
+	defer i.Unlock()
+	seq := []string{}
+	for _, s := range i.index {
+		if s == name {
+			continue
+		}
+		seq = append(seq, s)
+	}
+	i.index = seq
+	log.Printf("deleted post %v, new index: %+v", name, i.index)
 }
 
 func vintage(ua string) string {
@@ -460,7 +486,7 @@ func main() {
 	}
 
 	// index articles
-	indexArticles()
+	idx.indexArticles()
 
 	// favicon
 	fst, err := os.Stat(path.Join(*rootDir, "favicon.ico"))
