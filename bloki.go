@@ -3,10 +3,12 @@ package main
 
 // TODO:
 // admin interface
-// 2fa for admin login
+// 2fa for admin login, probably
+// https://www.twilio.com/docs/verify/quickstarts/totp
 // user manager
 // modern template
 // render node hook for /media/
+// continue reading element
 // user comments
 // s3 support
 // render to static site
@@ -127,7 +129,6 @@ func renderMd(md []byte, name, published string) string {
 					return ast.GoToNext, true
 				}
 				io.WriteString(w, "<h1><a href=\""+name+"\">")
-				// TODO: this may be a good place to put author and date of creation
 				return ast.GoToNext, true
 			}
 		}(),
