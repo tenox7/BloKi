@@ -32,6 +32,9 @@ type AdminTemplate struct {
 func serveAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
 	r.ParseMultipartForm(10 << 20)
+	if r.FormValue("view") != "" && r.FormValue("filename") != "" {
+		http.Redirect(w, r, "/"+strings.TrimSuffix(r.FormValue("filename"), ".md"), http.StatusFound)
+	}
 	user, ok := auth(w, r)
 	if !ok {
 		return
