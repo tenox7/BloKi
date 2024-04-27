@@ -28,6 +28,7 @@ import (
 type AdminTemplate struct {
 	SiteName string
 	AdminTab string
+	AdminUrl string
 }
 
 func serveAdmin(w http.ResponseWriter, r *http.Request) {
@@ -44,6 +45,7 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 
 	adm := AdminTemplate{
 		SiteName: *siteName,
+		AdminUrl: *adminUri,
 	}
 
 	adm.AdminTab, err = postAdmin(r, user)
