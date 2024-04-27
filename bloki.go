@@ -115,7 +115,7 @@ type TemplateData struct {
 	PgOldest  int
 }
 
-func renderMd(md []byte, name string) string {
+func renderMd(md []byte, name, published string) string {
 	p := parser.NewWithExtensions(parser.CommonExtensions | parser.Autolink)
 	d := p.Parse(md)
 	r := html.NewRenderer(html.RendererOptions{
@@ -125,7 +125,7 @@ func renderMd(md []byte, name string) string {
 					return ast.GoToNext, false
 				}
 				if !entering {
-					io.WriteString(w, "</a></h1>\n\n")
+					io.WriteString(w, "</a></h1>\n\n<i>"+published+"</i>\n\n")
 					return ast.GoToNext, true
 				}
 				io.WriteString(w, "<h1><a href=\""+name+"\">")
@@ -168,17 +168,11 @@ func (t *TemplateData) renderArticle(name string) {
 
 	author := authorRe.FindSubmatch(article)
 	if len(author) < 2 {
-		author = [][]byte{[]byte(""), []byte("n/a")}
+		author = [][]byte{[]byte(""), []byte("unknown")}
 	}
 
-	// TODO: this should be either a special tag in md or the template
-	article = append(article, []byte(
-		"\n\nFirst published: "+published.Format(timeFormat)+
-			" | Last updated: "+updated.Format(timeFormat)+
-			" | Author: "+string(author[1])+
-			"\n\n---\n\n")...)
-
-	t.Articles += renderMd(article, strings.TrimSuffix(name, ".md"))
+	p := "By " + string(author[1]) + ", First published: " + published.Format(timeFormat) + ", Last updated: " + updated.Format(timeFormat)
+	t.Articles += renderMd(article, strings.TrimSuffix(name, ".md"), p)
 }
 
 func (t *TemplateData) paginatePosts(pg int) {
