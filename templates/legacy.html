@@ -29,8 +29,8 @@
             </TR>
             <TR>
                 <TD WIDTH="80%" VALIGN="top">
-                    <A HREF="/">Home</A> |
-{{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
+                    <A HREF="/">Home</A>
+{{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
 {{ .Articles }}   
 {{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}
                 </TD>

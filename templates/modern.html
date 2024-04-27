@@ -25,8 +25,8 @@
     </div>
     <div class="main-content">
         <div class="articles">
-            <a href="/">Home</a> |
-            {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
+            <a href="/">Home</a>
+            {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
             {{.Articles}}   
             {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}
         </div>
