@@ -55,23 +55,6 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 
 func postAdmin(r *http.Request, user string) (string, error) {
 	var err error
-	buf := strings.Builder{}
-	buf.WriteString(`
-		<TABLE WIDTH="100%" HEIGHT="80%" BGCOLOR="#FFFFFF" CELLPADDING="0" CELLSPACING="0" BORDER="0">
-		<TR>
-			<TD NOWRAP WIDTH="100%" VALIGN="MIDDLE" ALIGN="LEFT" COLSPAN="2">
-				<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New Post" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
-				<INPUT TYPE="SUBMIT" NAME="load" VALUE="Load">
-				<INPUT TYPE="SUBMIT" NAME="save" VALUE="Save">
-				<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
-				<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');">
-			</TD>
-		</TR>	
-		<TR>
-		<TD NOWRAP WIDTH="10%" BGCOLOR="#F0F0F0" VALIGN="top">
-			<SELECT NAME="filename" SIZE="20" STYLE="width: 100%; height: 100%">
-	`)
-
 	var textArea string
 	switch {
 	case r.FormValue("save") != "" && r.FormValue("filename") != "":
@@ -108,6 +91,24 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		}
 		log.Printf("Saved post %q", r.FormValue("filename"))
 	}
+
+	buf := strings.Builder{}
+	buf.WriteString(`
+		<TABLE WIDTH="100%" HEIGHT="80%" BGCOLOR="#FFFFFF" CELLPADDING="0" CELLSPACING="0" BORDER="0">
+		<TR>
+			<TD NOWRAP WIDTH="100%" VALIGN="MIDDLE" ALIGN="LEFT" COLSPAN="2">
+				<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New Post" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
+				<INPUT TYPE="SUBMIT" NAME="load" VALUE="Load">
+				<INPUT TYPE="SUBMIT" NAME="save" VALUE="Save">
+				<INPUT TYPE="SUBMIT" NAME="view" VALUE="View">
+				<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
+				<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');">
+			</TD>
+		</TR>	
+		<TR>
+		<TD NOWRAP WIDTH="10%" BGCOLOR="#F0F0F0" VALIGN="top">
+			<SELECT NAME="filename" SIZE="20" STYLE="width: 100%; height: 100%">
+	`)
 
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
