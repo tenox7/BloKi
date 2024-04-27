@@ -4,7 +4,7 @@ go 1.21.5
 
 require (
 	github.com/gomarkdown/markdown v0.0.0-20240419095408-642f0ee99ae2
-	github.com/tenox7/tkvs v0.0.0-20240426075819-f24b6481ea33
+	github.com/tenox7/tkvs v0.0.0-20240426075845-d1ce85d15ddc
 	golang.org/x/crypto v0.22.0
 )
 

@@ -6,6 +6,8 @@ github.com/tenox7/tkvs v0.0.0-20240426062458-34293719a85f h1:459QNHg5qio0RhxmfY1
 github.com/tenox7/tkvs v0.0.0-20240426062458-34293719a85f/go.mod h1:ZtlY7ZAX3gbhIt99FPAwNp695XKGY+dMzN8ITY1qj1c=
 github.com/tenox7/tkvs v0.0.0-20240426075819-f24b6481ea33 h1:YgoSAcEPwcB1DPV9iFWjrcde8tQ3BWDv9x+qp8uDlk4=
 github.com/tenox7/tkvs v0.0.0-20240426075819-f24b6481ea33/go.mod h1:ZtlY7ZAX3gbhIt99FPAwNp695XKGY+dMzN8ITY1qj1c=
+github.com/tenox7/tkvs v0.0.0-20240426075845-d1ce85d15ddc h1:XiDQdelQD/gRGpJZOU6XEhMORrUy1bew3UzkGev0oG4=
+github.com/tenox7/tkvs v0.0.0-20240426075845-d1ce85d15ddc/go.mod h1:TG2NAUkqI/K9dgS7ii3ziIAuyBZqYNM/A+Cmr1HNbuE=
 golang.org/x/crypto v0.22.0 h1:g1v0xeRhjcugydODzvb3mEM9SQ0HGp9s/nh3COQ/C30=
 golang.org/x/crypto v0.22.0/go.mod h1:vr6Su+7cTlO45qkww3VDJlzDn0ctJvRgYbC2NvXHt+M=
 golang.org/x/net v0.24.0 h1:1PcaxkF854Fu3+lvBIx5SYn9wRlBzzcnHZSiaFFAb0w=
