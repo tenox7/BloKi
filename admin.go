@@ -264,5 +264,7 @@ func manageUsers() {
 			}
 			fmt.Println(u)
 		}
+	default:
+		fmt.Println("usage: bloki user <passwd|delete|list> [username]")
 	}
 }
