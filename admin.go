@@ -49,6 +49,7 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "text/html")
 	templates["admin"].Execute(w, adm)
 }
 
