@@ -15,8 +15,6 @@ package main
 // wiki mode
 // startup wizard
 // statistics module, page views, latencies, etc
-// article footer/header should be customizable, a template?
-// articles could be array / range
 // service files, etc
 // git integration
 // make favicon configurable
@@ -148,7 +146,6 @@ func (t *TemplateData) renderArticle(name string) {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
 	}
-	log.Printf("read file %q", name)
 	fi, err := os.Stat(fp)
 	if err != nil {
 		t.Articles = renderError(name, "unable to stat")
@@ -189,7 +186,7 @@ func (t *TemplateData) paginatePosts(pg int) {
 }
 
 func servePosts(w http.ResponseWriter, r *http.Request) {
-	log.Printf("req from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
+	log.Printf("view from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
 	td := TemplateData{
@@ -268,7 +265,7 @@ func (i *postIndex) indexArticles() {
 		return published[seq[j]].Before(published[seq[i]])
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
-	log.Printf("indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
+	log.Printf("Indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
 	i.Lock()
 	defer i.Unlock()
 	i.index = seq
