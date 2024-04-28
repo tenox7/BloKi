@@ -27,7 +27,6 @@ package main
 // lambda, cloud functions
 // html.EscapeString() for filenames
 // better error handling, use string builder
-// index remake, add more info to index struct, less readdir
 
 import (
 	"crypto/tls"
