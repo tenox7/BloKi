@@ -97,7 +97,7 @@ var (
 )
 
 type postIndex struct {
-	index []string
+	pubSorted []string
 	// add a map with dates, author, tags, etc
 	pageLast int
 
@@ -180,9 +180,8 @@ func (t *TemplateData) paginatePosts(pg int) {
 	t.PgOlder = pg + 1
 	t.PgNewer = pg - 1
 	t.PgOldest = idx.pageLast
-	index := idx.index
-	for i := t.Page * (*artPerPg); i < (t.Page+1)*(*artPerPg) && i < len(index); i++ {
-		t.renderArticle(index[i])
+	for i := t.Page * (*artPerPg); i < (t.Page+1)*(*artPerPg) && i < len(idx.pubSorted); i++ {
+		t.renderArticle(idx.pubSorted[i])
 	}
 }
 
@@ -269,34 +268,34 @@ func (i *postIndex) indexArticles() {
 	log.Printf("Indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
 	i.Lock()
 	defer i.Unlock()
-	i.index = seq
+	i.pubSorted = seq
 	i.pageLast = pgMax
 }
 
 func (i *postIndex) renamePost(old, new string) {
 	i.Lock()
 	defer i.Unlock()
-	for n, p := range i.index {
+	for n, p := range i.pubSorted {
 		if p != old {
 			continue
 		}
-		i.index[n] = new
+		i.pubSorted[n] = new
 	}
-	log.Printf("rename %q to %q, new index: %+v", old, new, i.index)
+	log.Printf("rename %q to %q, new index: %+v", old, new, i.pubSorted)
 }
 
 func (i *postIndex) deletePost(name string) {
 	i.Lock()
 	defer i.Unlock()
 	seq := []string{}
-	for _, s := range i.index {
+	for _, s := range i.pubSorted {
 		if s == name {
 			continue
 		}
 		seq = append(seq, s)
 	}
-	i.index = seq
-	log.Printf("deleted post %v, new index: %+v", name, i.index)
+	i.pubSorted = seq
+	log.Printf("deleted post %v, new index: %+v", name, i.pubSorted)
 }
 
 func vintage(ua string) string {
