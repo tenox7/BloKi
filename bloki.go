@@ -2,7 +2,6 @@
 package main
 
 // TODO:
-// unlock before render in paginate articles
 // admin interface
 // 2fa for admin login, probably
 // https://www.twilio.com/docs/verify/quickstarts/totp
@@ -167,15 +166,16 @@ func (t *TemplateData) renderArticle(name string) {
 }
 
 func (t *TemplateData) paginatePosts(pg int) {
-	// TODO: unlock before render articles
 	idx.RLock()
-	defer idx.RUnlock()
+	seq := idx.pubSorted
+	pgl := idx.pageLast
+	idx.RUnlock()
 	t.Page = pg
 	t.PgOlder = pg + 1
 	t.PgNewer = pg - 1
-	t.PgOldest = idx.pageLast
-	for i := t.Page * (*artPerPg); i < (t.Page+1)*(*artPerPg) && i < len(idx.pubSorted); i++ {
-		t.renderArticle(idx.pubSorted[i])
+	t.PgOldest = pgl
+	for i := t.Page * (*artPerPg); i < (t.Page+1)*(*artPerPg) && i < len(seq); i++ {
+		t.renderArticle(seq[i])
 	}
 }
 
