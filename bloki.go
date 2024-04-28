@@ -2,6 +2,7 @@
 package main
 
 // TODO:
+// unlock before render in paginate articles
 // admin interface
 // 2fa for admin login, probably
 // https://www.twilio.com/docs/verify/quickstarts/totp
@@ -98,10 +99,18 @@ var (
 
 type postIndex struct {
 	pubSorted []string
-	// add a map with dates, author, tags, etc
-	pageLast int
+	metaData  map[string]postMetadata
+	pageLast  int
 
 	sync.RWMutex
+}
+
+type postMetadata struct {
+	author    string
+	published time.Time
+	modified  time.Time
+	tile      string
+	filename  string
 }
 
 type TemplateData struct {
@@ -141,39 +150,24 @@ func renderError(name, errStr string) string {
 }
 
 func (t *TemplateData) renderArticle(name string) {
-	fp := path.Join(*rootDir, *postsDir, name)
-	article, err := os.ReadFile(fp)
+	idx.RLock()
+	m := idx.metaData[name]
+	idx.RUnlock()
+	if m.published.Equal(time.Unix(0, 0)) {
+		t.Articles = renderError(name, "not found") // TODO: better error handling
+		return
+	}
+	article, err := os.ReadFile(path.Join(*rootDir, *postsDir, name))
 	if err != nil {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
 	}
-	fi, err := os.Stat(fp)
-	if err != nil {
-		t.Articles = renderError(name, "unable to stat")
-		return
-	}
-	updated := fi.ModTime()
-
-	m := publishedRe.FindSubmatch(article)
-	if len(m) < 1 {
-		m = [][]byte{[]byte(""), []byte("")}
-	}
-	published, err := time.Parse(timeFormat, string(m[1]))
-	if err != nil {
-		log.Printf("Unable to parse publication date in %q: %v", name, err)
-		published = time.Unix(0, 0)
-	}
-
-	author := authorRe.FindSubmatch(article)
-	if len(author) < 2 {
-		author = [][]byte{[]byte(""), []byte("unknown")}
-	}
-
-	p := "By " + string(author[1]) + ", First published: " + published.Format(timeFormat) + ", Last updated: " + updated.Format(timeFormat)
+	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
 	t.Articles += renderMd(article, strings.TrimSuffix(name, ".md"), p)
 }
 
 func (t *TemplateData) paginatePosts(pg int) {
+	// TODO: unlock before render articles
 	idx.RLock()
 	defer idx.RUnlock()
 	t.Page = pg
@@ -238,10 +232,14 @@ func (i *postIndex) indexArticles() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	published := make(map[string]time.Time)
+	meta := make(map[string]postMetadata)
 	seq := []string{}
 	for _, f := range d {
 		if f.IsDir() || f.Name()[0:1] == "." || !strings.HasSuffix(f.Name(), ".md") {
+			continue
+		}
+		fi, err := f.Info()
+		if err != nil {
 			continue
 		}
 		a, err := os.ReadFile(path.Join(*rootDir, *postsDir, f.Name()))
@@ -249,25 +247,38 @@ func (i *postIndex) indexArticles() {
 			log.Printf("error reading %v: %v", f.Name(), err)
 			continue
 		}
+		author := authorRe.FindSubmatch(a)
+		if len(author) < 2 {
+			author = [][]byte{[]byte(""), []byte("unknown")}
+		}
 		m := publishedRe.FindSubmatch(a)
 		if len(m) < 1 {
-			continue
+			m = [][]byte{[]byte(""), []byte("")}
 		}
 		t, err := time.Parse(timeFormat, string(m[1]))
 		if err != nil {
-			log.Printf("Unable to parse publication date in %q: %v", f.Name(), err)
+			t = time.Unix(0, 0)
+		}
+		// TODO: add title from regexp
+		meta[f.Name()] = postMetadata{
+			filename:  f.Name(),
+			modified:  fi.ModTime(),
+			published: t,
+			author:    string(author[1]),
+		}
+		if t.Equal(time.Unix(0, 0)) {
 			continue
 		}
-		published[f.Name()] = t
 		seq = append(seq, f.Name())
 	}
 	sort.Slice(seq, func(i, j int) bool {
-		return published[seq[j]].Before(published[seq[i]])
+		return meta[seq[j]].published.Before(meta[seq[i]].published)
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
 	log.Printf("Indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
 	i.Lock()
 	defer i.Unlock()
+	idx.metaData = meta
 	i.pubSorted = seq
 	i.pageLast = pgMax
 }
