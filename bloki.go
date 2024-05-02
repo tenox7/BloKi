@@ -2,6 +2,11 @@
 package main
 
 // TODO:
+// legacy.html should use css/div instead of tables
+// make width constant - 1000px in WP?
+// index update for a single file + re-run sequence
+// make admin save/rename/delete use that
+// reindex on signal
 // admin interface
 // 2fa for admin login, probably
 // https://www.twilio.com/docs/verify/quickstarts/totp
@@ -27,6 +32,7 @@ package main
 // lambda, cloud functions
 // html.EscapeString() for filenames
 // better error handling, use string builder
+// reindex on inotify (incl rename/move)
 
 import (
 	"crypto/tls"
@@ -234,6 +240,8 @@ func (i *postIndex) indexArticles() {
 	meta := make(map[string]postMetadata)
 	seq := []string{}
 	for _, f := range d {
+		// move this whole thing in to another function that can be called externally
+		// for example by admin save/rename/delete
 		if f.IsDir() || f.Name()[0:1] == "." || !strings.HasSuffix(f.Name(), ".md") {
 			continue
 		}
