@@ -2,7 +2,6 @@
 // sort list of articles
 // search posts
 // post list pagination pagination
-// wiki style links to post/media/etc
 // media management
 // user management
 // stats

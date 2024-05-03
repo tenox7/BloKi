@@ -165,6 +165,7 @@ func (t *TemplateData) renderArticle(name string) {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
 	}
+	article = append(article, []byte("\n\n---\n\n")...)
 	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
 	t.Articles += renderMd(article, strings.TrimSuffix(name, ".md"), p)
 }
