@@ -8,8 +8,8 @@ package main
 // 2fa for admin login, probably
 // https://www.twilio.com/docs/verify/quickstarts/totp
 // user manager
-// modern template
 // render node hook for /media/
+// wiki style links to post/media/etc
 // continue reading block element inside a post like in WP
 // user comments
 // s3 support
