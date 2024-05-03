@@ -3,6 +3,7 @@ package main
 
 // TODO:
 // legacy.html should use css/div instead of tables
+// subtitle in header
 // make width constant - 1000px in WP?
 // index update for a single file + re-run sequence
 // make admin save/rename/delete use that

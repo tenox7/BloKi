@@ -1,6 +1,8 @@
 // Admin TODO
 // sort list of articles
 // search posts
+// post list pagination pagination
+// wiki style links to post/media/etc
 // media management
 // user management
 // stats
@@ -21,22 +23,24 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"time"
 )
+
+var bgf = map[bool]string{false: "#FFFFFF", true: "#E0E0E0"}
 
 type AdminTemplate struct {
 	SiteName string
 	AdminTab string
 	AdminUrl string
+	User     string
+	CharSet  string
 }
 
 func serveAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
 	r.ParseMultipartForm(10 << 20)
-	if r.FormValue("view") != "" && r.FormValue("filename") != "" {
-		http.Redirect(w, r, "/"+strings.TrimSuffix(r.FormValue("filename"), ".md"), http.StatusFound)
-	}
 	user, ok := auth(w, r)
 	if !ok {
 		return
@@ -46,6 +50,8 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 	adm := AdminTemplate{
 		SiteName: *siteName,
 		AdminUrl: *adminUri,
+		User:     user,
+		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 	}
 
 	adm.AdminTab, err = postAdmin(r, user)
@@ -60,82 +66,112 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func postAdmin(r *http.Request, user string) (string, error) {
-	var err error
-	var textArea string
 	switch {
+	case r.FormValue("edit") != "" && r.FormValue("filename") != "":
+		return editPost(r.FormValue("filename"))
+
 	case r.FormValue("save") != "" && r.FormValue("filename") != "":
 		err := savePost(r.FormValue("filename"), r.FormValue("textdata"))
 		if err != nil {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
 		}
-		textArea = r.FormValue("textdata")
 		idx.indexArticles()
-	case r.FormValue("load") != "" && r.FormValue("filename") != "":
-		textArea, err = loadPost(r.FormValue("filename"))
-		if err != nil {
-			log.Printf("Unable to load post %q: %v", r.FormValue("filename"), err)
-			return "", err
-		}
+
 	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
 		os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, r.FormValue("rename")))
 		idx.renamePost(r.FormValue("filename"), r.FormValue("rename"))
 		log.Printf("Renamed %v to %v", r.FormValue("filename"), r.FormValue("rename"))
 		r.Form.Set("filename", r.FormValue("rename"))
+		idx.indexArticles()
+
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
 		os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
 		idx.deletePost(r.FormValue("filename"))
 		log.Printf("Deleted post %q", r.FormValue("filename"))
 		r.Form.Del("filename")
+		idx.indexArticles()
+
 	case r.FormValue("newpost") != "":
 		r.Form.Set("filename", r.FormValue("newpost"))
-		textArea = "[//]: # (not-published=" + time.Now().Format(timeFormat) + ")\n[//]: # (author=" + user + ")\n\n# New Post!\n\nHello world!\n\n"
-		err := savePost(r.FormValue("filename"), textArea)
+		// os stat to see if file exists and refuse to overwrite it
+		_, err := os.Stat(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
+		if err == nil {
+			return "", fmt.Errorf("file %q already exists", r.FormValue("filename"))
+		}
+		err = savePost(r.FormValue("filename"),
+			"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
 		if err != nil {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
 		}
-		log.Printf("Saved post %q", r.FormValue("filename"))
+		log.Printf("Created new post %q", r.FormValue("filename"))
+		return editPost(r.FormValue("filename"))
 	}
+	return articleList()
+}
 
-	buf := strings.Builder{}
-	buf.WriteString(`
-		<TABLE WIDTH="100%" HEIGHT="80%" BGCOLOR="#FFFFFF" CELLPADDING="0" CELLSPACING="0" BORDER="0">
-		<TR>
-			<TD NOWRAP WIDTH="100%" VALIGN="MIDDLE" ALIGN="LEFT" COLSPAN="2">
-				<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New Post" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
-				<INPUT TYPE="SUBMIT" NAME="load" VALUE="Load">
-				<INPUT TYPE="SUBMIT" NAME="save" VALUE="Save">
-				<INPUT TYPE="SUBMIT" NAME="view" VALUE="View">
-				<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
-				<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');">
-			</TD>
-		</TR>	
-		<TR>
-		<TD NOWRAP WIDTH="10%" BGCOLOR="#F0F0F0" VALIGN="top">
-			<SELECT NAME="filename" SIZE="20" STYLE="width: 100%; height: 100%">
-	`)
-
-	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
+// perhaps we should have update in place, save and reopen
+func editPost(fn string) (string, error) {
+	data, err := loadPost(fn)
 	if err != nil {
-		return "", err
+		return "", errors.New("Unable to open " + fn)
 	}
-	for _, f := range d {
-		if f.IsDir() || f.Name()[0:1] == "." || !strings.HasSuffix(f.Name(), ".md") {
-			continue
+	buf := strings.Builder{}
+	buf.WriteString("<H1>Editing - " + html.EscapeString(fn) +
+		"</H1>\n" +
+		"<TEXTAREA NAME=\"textdata\" SPELLCHECK=\"true\" COLS=\"80\" ROWS=\"24\" WRAP=\"soft\" STYLE=\"width: 99%; height: 99%;\">\n" +
+		data + "</TEXTAREA><P>\n" +
+		"<INPUT TYPE=\"SUBMIT\" NAME=\"save\" VALUE=\"Save\"> <INPUT TYPE=\"SUBMIT\" NAME=\"cancel\" VALUE=\"Cancel\"><P>\n" +
+		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + fn + "\">\n",
+	)
+	return buf.String(), nil
+}
+
+// TODO: I think that edit should be default action on a post and view could be in a secondary column in the table?
+// or better no view rather preview from inside the post
+func articleList() (string, error) {
+	buf := strings.Builder{}
+	buf.WriteString(`<H1>Posts</H1>
+		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
+		<INPUT TYPE="SUBMIT" NAME="edit" VALUE="Edit">
+		<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
+		<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');"><P>
+		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
+		<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Article</TH><TH>Author</TH><TH>Published</TH><TH>Modified</TH></TR>
+	`)
+
+	idx.RLock()
+	defer idx.RUnlock()
+	srt := []string{}
+	for a := range idx.metaData {
+		srt = append(srt, a)
+	}
+	sort.SliceStable(srt, func(i, j int) bool {
+		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) {
+			return true
+		} else if idx.metaData[srt[j]].published.Equal(time.Unix(0, 0)) {
+			return false
 		}
-		buf.WriteString("<OPTION " + selected(f.Name(), r.FormValue("filename")) + ">" + html.EscapeString(f.Name()) + "</OPTION>\n")
+		return idx.metaData[srt[j]].published.Before(idx.metaData[srt[i]].published)
+	})
+
+	i := 0
+	for _, a := range srt {
+		p := idx.metaData[a].published.Format(timeFormat)
+		if idx.metaData[a].published.Equal(time.Unix(0, 0)) {
+			p = "draft"
+		}
+		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
+			"<TD><INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + a + "\">&nbsp;" +
+			"<A HREF=\"/" + strings.TrimSuffix(idx.metaData[a].filename, ".md") + "\" TARGET=\"_blank\">" + idx.metaData[a].filename + "</A></TD>" +
+			"<TD>" + idx.metaData[a].author + "</TD>" +
+			"<TD>" + p + "</TD>" +
+			"<TD>" + idx.metaData[a].modified.Format(timeFormat) + "</TD></TR>\n")
+		i++
 	}
 
-	buf.WriteString(`
-			</SELECT>
-		</TD>
-		<TD NOWRAP WIDTH="80%" VALIGN="top">
-			<TEXTAREA NAME="textdata" SPELLCHECK="true" COLS="80" ROWS="24" WRAP="soft" STYLE="width: 98%; height: 98%">` + textArea + `</TEXTAREA>
-		</TD>
-	</TR>
-	</TABLE>
-	`)
+	buf.WriteString(`</TABLE>`)
 
 	return buf.String(), nil
 }
