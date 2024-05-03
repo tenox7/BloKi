@@ -2,7 +2,6 @@
 package main
 
 // TODO:
-// legacy.html should use css/div instead of tables
 // subtitle in header
 // make width constant - 1000px in WP?
 // index update for a single file + re-run sequence
@@ -14,11 +13,11 @@ package main
 // user manager
 // modern template
 // render node hook for /media/
-// continue reading element
+// continue reading block element
 // user comments
 // s3 support
 // render to static site
-// throttle
+// throttle qps
 // fastcgi
 // wiki mode
 // startup wizard
@@ -67,7 +66,8 @@ import (
 )
 
 var (
-	siteName = flag.String("site_name", "My Blog", "Name your blog")
+	siteName = flag.String("site_name", "My Blog", "Name of your blog")
+	subTitle = flag.String("subtitle", "", "Subtitle")
 	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
 	adminUri = flag.String("admin_uri", "/bk-admin/", "address of the admin interface")
 	rootDir  = flag.String("root_dir", "site/", "directory where site data is stored")
@@ -120,6 +120,7 @@ type postMetadata struct {
 
 type TemplateData struct {
 	SiteName  string
+	SubTitle  string
 	Articles  string
 	CharSet   string
 	Paginator string
@@ -191,6 +192,7 @@ func servePosts(w http.ResponseWriter, r *http.Request) {
 
 	td := TemplateData{
 		SiteName: *siteName,
+		SubTitle: *subTitle,
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 	}
 
