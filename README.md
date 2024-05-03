@@ -10,16 +10,15 @@ If you want an ultra small, simple, easy to use, high performance, micro blog/wi
 
 - Different HTML templates for modern, legacy and vintage web browsers. BloKi supports modern, low end, legacy and text mode browsers.
 
-- Web based admin interface with markdown editor. However the articles and media are stored as regular files. Editable in any editor of your choice. Versioned by Git. In future it will support S3 buckets.
+- Web based admin interface with built-in markdown editor. However, the articles and media are stored as regular files. Editable in any editor of your choice. Versioned by Git. In future it will support S3 buckets.
 
 - The server software is a single file, statically linked, self contained binary. Runs on most modern OSes without any external dependencies, scripting runtimes, libraries, etc. Easily host your blog on a Raspberry PI, small VM, Docker container, Lambda or Cloud Run function.
 
 
 ## Current status
 
-- Blog engine works if articles and media are created on a disk by hand
+- Basic blog engine and admin interface works.
 - You can see working example [here](https://blog.tenox.net/)
-- A crud first version of admin interface is available along with user auth.
 
 Development progress can be tracked on [dogfood blog](https://blog.tenox.net/)
 
