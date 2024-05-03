@@ -25,7 +25,6 @@ package main
 // docker container
 // cloud run, fargate
 // lambda, cloud functions
-// html.EscapeString() for filenames
 // better error handling, use string builder
 
 // MAYBE:

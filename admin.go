@@ -21,6 +21,7 @@ import (
 	"html"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"sort"
@@ -123,7 +124,7 @@ func editPost(fn string) (string, error) {
 		"<TEXTAREA NAME=\"textdata\" SPELLCHECK=\"true\" COLS=\"80\" ROWS=\"24\" WRAP=\"soft\" STYLE=\"width: 99%; height: 99%;\">\n" +
 		data + "</TEXTAREA><P>\n" +
 		"<INPUT TYPE=\"SUBMIT\" NAME=\"save\" VALUE=\"Save\"> <INPUT TYPE=\"SUBMIT\" NAME=\"cancel\" VALUE=\"Cancel\"><P>\n" +
-		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + fn + "\">\n",
+		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + html.EscapeString(fn) + "\">\n",
 	)
 	return buf.String(), nil
 }
@@ -162,9 +163,10 @@ func articleList() (string, error) {
 		if idx.metaData[a].published.Equal(time.Unix(0, 0)) {
 			p = "draft"
 		}
+		fn := idx.metaData[a].filename
 		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
 			"<TD><INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + a + "\">&nbsp;" +
-			"<A HREF=\"/" + strings.TrimSuffix(idx.metaData[a].filename, ".md") + "\" TARGET=\"_blank\">" + idx.metaData[a].filename + "</A></TD>" +
+			"<A HREF=\"/" + url.PathEscape(strings.TrimSuffix(fn, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(fn) + "</A></TD>" +
 			"<TD>" + idx.metaData[a].author + "</TD>" +
 			"<TD>" + p + "</TD>" +
 			"<TD>" + idx.metaData[a].modified.Format(timeFormat) + "</TD></TR>\n")
