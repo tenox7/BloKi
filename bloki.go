@@ -2,18 +2,15 @@
 package main
 
 // TODO:
-// subtitle in header
-// make width constant - 1000px in WP?
 // index update for a single file + re-run sequence
 // make admin save/rename/delete use that
 // reindex on signal
-// admin interface
 // 2fa for admin login, probably
 // https://www.twilio.com/docs/verify/quickstarts/totp
 // user manager
 // modern template
 // render node hook for /media/
-// continue reading block element
+// continue reading block element inside a post like in WP
 // user comments
 // s3 support
 // render to static site
@@ -24,14 +21,15 @@ package main
 // statistics module, page views, latencies, etc
 // service files, etc
 // git integration
-// make favicon configurable
 // make robots.txt configurable
-// service files
 // docker container
 // cloud run, fargate
 // lambda, cloud functions
 // html.EscapeString() for filenames
 // better error handling, use string builder
+
+// MAYBE:
+// constant make width - 1000px in WP?
 // reindex on inotify (incl rename/move)
 
 import (
