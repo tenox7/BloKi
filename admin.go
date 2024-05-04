@@ -88,9 +88,13 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		idx.indexArticles()
 
 	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
-		os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, r.FormValue("rename")))
-		idx.renamePost(r.FormValue("filename"), r.FormValue("rename"))
-		log.Printf("Renamed %v to %v", r.FormValue("filename"), r.FormValue("rename"))
+		newname := r.FormValue("rename")
+		if !strings.HasSuffix(newname, ".md") {
+			newname = newname + ".md"
+		}
+		os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, newname))
+		idx.renamePost(r.FormValue("filename"), newname)
+		log.Printf("Renamed %v to %v", r.FormValue("filename"), newname)
 
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
 		os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
@@ -99,6 +103,9 @@ func postAdmin(r *http.Request, user string) (string, error) {
 
 	case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
 		filename := r.FormValue("newpost")
+		if !strings.HasSuffix(filename, ".md") {
+			filename = filename + ".md"
+		}
 		_, err := os.Stat(path.Join(*rootDir, *postsDir, filename))
 		if err == nil {
 			return "", fmt.Errorf("new post file %q already exists", filename)
@@ -110,6 +117,7 @@ func postAdmin(r *http.Request, user string) (string, error) {
 			return "", err
 		}
 		log.Printf("Created new post %q", filename)
+		// TODO: idx update single article
 		idx.indexArticles()
 		return postEdit(filename)
 	}
