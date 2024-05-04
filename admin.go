@@ -84,36 +84,34 @@ func postAdmin(r *http.Request, user string) (string, error) {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
 		}
+		// TODO: idx update single article
 		idx.indexArticles()
 
 	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
 		os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, r.FormValue("rename")))
 		idx.renamePost(r.FormValue("filename"), r.FormValue("rename"))
 		log.Printf("Renamed %v to %v", r.FormValue("filename"), r.FormValue("rename"))
-		r.Form.Set("filename", r.FormValue("rename"))
 
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
 		os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
 		idx.deletePost(r.FormValue("filename"))
 		log.Printf("Deleted post %q", r.FormValue("filename"))
-		r.Form.Del("filename")
 
 	case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
-		r.Form.Set("filename", r.FormValue("newpost"))
-		// os stat to see if file exists and refuse to overwrite it
-		_, err := os.Stat(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
+		filename := r.FormValue("newpost")
+		_, err := os.Stat(path.Join(*rootDir, *postsDir, filename))
 		if err == nil {
-			return "", fmt.Errorf("new post file %q already exists", r.FormValue("filename"))
+			return "", fmt.Errorf("new post file %q already exists", filename)
 		}
-		err = postSave(r.FormValue("filename"),
+		err = postSave(filename,
 			"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
 		if err != nil {
-			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
+			log.Printf("Unable to save post %q: %v", filename, err)
 			return "", err
 		}
-		log.Printf("Created new post %q", r.FormValue("filename"))
+		log.Printf("Created new post %q", filename)
 		idx.indexArticles()
-		return postEdit(r.FormValue("filename"))
+		return postEdit(filename)
 	}
 	return postList()
 }
