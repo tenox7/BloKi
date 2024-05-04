@@ -68,10 +68,10 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 func postAdmin(r *http.Request, user string) (string, error) {
 	switch {
 	case r.FormValue("edit") != "" && r.FormValue("filename") != "":
-		return editPost(r.FormValue("filename"))
+		return postEdit(r.FormValue("filename"))
 
 	case r.FormValue("save") != "" && r.FormValue("filename") != "":
-		err := savePost(r.FormValue("filename"), r.FormValue("textdata"))
+		err := postSave(r.FormValue("filename"), r.FormValue("textdata"))
 		if err != nil {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
@@ -99,21 +99,21 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		if err == nil {
 			return "", fmt.Errorf("file %q already exists", r.FormValue("filename"))
 		}
-		err = savePost(r.FormValue("filename"),
+		err = postSave(r.FormValue("filename"),
 			"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
 		if err != nil {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
 		}
 		log.Printf("Created new post %q", r.FormValue("filename"))
-		return editPost(r.FormValue("filename"))
+		return postEdit(r.FormValue("filename"))
 	}
-	return articleList()
+	return postList()
 }
 
 // perhaps we should have update in place, save and reopen
-func editPost(fn string) (string, error) {
-	data, err := loadPost(fn)
+func postEdit(fn string) (string, error) {
+	data, err := postLoad(fn)
 	if err != nil {
 		return "", errors.New("Unable to open " + fn)
 	}
@@ -130,7 +130,7 @@ func editPost(fn string) (string, error) {
 
 // TODO: I think that edit should be default action on a post and view could be in a secondary column in the table?
 // or better no view rather preview from inside the post
-func articleList() (string, error) {
+func postList() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Posts</H1>
 		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
@@ -138,7 +138,7 @@ func articleList() (string, error) {
 		<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
 		<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');"><P>
 		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
-		<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Article</TH><TH>Author</TH><TH>Published</TH><TH>Modified</TH></TR>
+		<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Article</TH><TH>Author</TH><TH>&darr;Published</TH><TH>Modified</TH></TR>
 	`)
 
 	idx.RLock()
@@ -177,7 +177,7 @@ func articleList() (string, error) {
 	return buf.String(), nil
 }
 
-func savePost(fileName, postText string) error {
+func postSave(fileName, postText string) error {
 	if fileName == "" {
 		return nil
 	}
@@ -201,19 +201,12 @@ func savePost(fileName, postText string) error {
 	return nil
 }
 
-func loadPost(fileName string) (string, error) {
+func postLoad(fileName string) (string, error) {
 	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, fileName))
 	if err != nil {
 		return "", errors.New("unable to read " + fileName + " : " + err.Error())
 	}
 	return html.EscapeString(string(f)), nil
-}
-
-func selected(a, b string) string {
-	if a == b {
-		return "SELECTED"
-	}
-	return ""
 }
 
 func auth(w http.ResponseWriter, r *http.Request) (string, bool) {
