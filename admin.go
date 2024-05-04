@@ -98,12 +98,12 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		log.Printf("Deleted post %q", r.FormValue("filename"))
 		r.Form.Del("filename")
 
-	case r.FormValue("newpost") != "":
+	case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
 		r.Form.Set("filename", r.FormValue("newpost"))
 		// os stat to see if file exists and refuse to overwrite it
 		_, err := os.Stat(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
 		if err == nil {
-			return "", fmt.Errorf("file %q already exists", r.FormValue("filename"))
+			return "", fmt.Errorf("new post file %q already exists", r.FormValue("filename"))
 		}
 		err = postSave(r.FormValue("filename"),
 			"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")

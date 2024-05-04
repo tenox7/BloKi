@@ -156,7 +156,7 @@ func (t *TemplateData) renderArticle(name string) {
 	m := idx.metaData[name]
 	idx.RUnlock()
 	if m.published.Equal(time.Unix(0, 0)) {
-		t.Articles = renderError(name, "not found") // TODO: better error handling
+		t.Articles = renderError(name, "not published") // TODO: better error handling
 		return
 	}
 	article, err := os.ReadFile(path.Join(*rootDir, *postsDir, name))
