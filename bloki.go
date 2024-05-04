@@ -112,7 +112,6 @@ type postMetadata struct {
 	published time.Time
 	modified  time.Time
 	tile      string
-	filename  string
 }
 
 type TemplateData struct {
@@ -269,7 +268,6 @@ func (i *postIndex) indexArticles() {
 		}
 		// TODO: add title from regexp
 		meta[f.Name()] = postMetadata{
-			filename:  f.Name(),
 			modified:  fi.ModTime(),
 			published: t,
 			author:    string(author[1]),
@@ -283,7 +281,7 @@ func (i *postIndex) indexArticles() {
 		return meta[seq[j]].published.Before(meta[seq[i]].published)
 	})
 	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
-	log.Printf("Indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
+	log.Printf("idx: indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
 	i.Lock()
 	defer i.Unlock()
 	idx.metaData = meta
@@ -300,7 +298,9 @@ func (i *postIndex) renamePost(old, new string) {
 		}
 		i.pubSorted[n] = new
 	}
-	log.Printf("rename %q to %q, new index: %+v", old, new, i.pubSorted)
+	i.metaData[new] = i.metaData[old]
+	delete(i.metaData, old)
+	log.Printf("idx: rename %q to %q, new index: %+v", old, new, i.pubSorted)
 }
 
 func (i *postIndex) deletePost(name string) {
@@ -314,7 +314,8 @@ func (i *postIndex) deletePost(name string) {
 		seq = append(seq, s)
 	}
 	i.pubSorted = seq
-	log.Printf("deleted post %v, new index: %+v", name, i.pubSorted)
+	delete(i.metaData, name)
+	log.Printf("idx: deleted post %v, new index: %+v", name, i.pubSorted)
 }
 
 func vintage(ua string) string {

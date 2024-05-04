@@ -91,14 +91,12 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		idx.renamePost(r.FormValue("filename"), r.FormValue("rename"))
 		log.Printf("Renamed %v to %v", r.FormValue("filename"), r.FormValue("rename"))
 		r.Form.Set("filename", r.FormValue("rename"))
-		idx.indexArticles()
 
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
 		os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
 		idx.deletePost(r.FormValue("filename"))
 		log.Printf("Deleted post %q", r.FormValue("filename"))
 		r.Form.Del("filename")
-		idx.indexArticles()
 
 	case r.FormValue("newpost") != "":
 		r.Form.Set("filename", r.FormValue("newpost"))
@@ -114,6 +112,7 @@ func postAdmin(r *http.Request, user string) (string, error) {
 			return "", err
 		}
 		log.Printf("Created new post %q", r.FormValue("filename"))
+		idx.indexArticles()
 		return postEdit(r.FormValue("filename"))
 	}
 	return postList()
@@ -155,6 +154,7 @@ func postList() (string, error) {
 	for a := range idx.metaData {
 		srt = append(srt, a)
 	}
+	// TODO: also sort unpublished by mod time
 	sort.SliceStable(srt, func(i, j int) bool {
 		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) {
 			return true
@@ -170,10 +170,9 @@ func postList() (string, error) {
 		if idx.metaData[a].published.Equal(time.Unix(0, 0)) {
 			p = "draft"
 		}
-		fn := idx.metaData[a].filename
 		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
 			"<TD><INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + a + "\">&nbsp;" +
-			"<A HREF=\"/" + url.PathEscape(strings.TrimSuffix(fn, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(fn) + "</A></TD>" +
+			"<A HREF=\"/" + url.PathEscape(strings.TrimSuffix(a, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(a) + "</A></TD>" +
 			"<TD>" + idx.metaData[a].author + "</TD>" +
 			"<TD>" + p + "</TD>" +
 			"<TD>" + idx.metaData[a].modified.Format(timeFormat) + "</TD></TR>\n")
