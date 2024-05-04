@@ -37,10 +37,10 @@
             BloKi Admin - {{.SiteName}} 
         </DIV>
         <DIV CLASS="sidebar">
-            <DIV CLASS="active"><A HREF="{{.AdminUrl}}?tab=posts">Posts</A></DIV>
-            <DIV CLASS="menuitem"><A HREF="{{.AdminUrl}}?tab=media">Media</A></DIV>
-            <DIV CLASS="menuitem"><A HREF="{{.AdminUrl}}?tab=users">Users</A></DIV>
-            <DIV CLASS="menuitem"><A HREF="{{.AdminUrl}}?tab=stats">Stats</A></DIV>
+            <DIV CLASS="{{if eq .ActiveTab "posts"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=posts">Posts</A></DIV>
+            <DIV CLASS="{{if eq .ActiveTab "media"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=media">Media</A></DIV>
+            <DIV CLASS="{{if eq .ActiveTab "users"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=users">Users</A></DIV>
+            <DIV CLASS="{{if eq .ActiveTab "stats"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=stats">Stats</A></DIV>
         </DIV>
         <DIV CLASS="content">
             {{.AdminTab}}

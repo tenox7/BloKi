@@ -31,11 +31,12 @@ import (
 var bgf = map[bool]string{false: "#FFFFFF", true: "#E0E0E0"}
 
 type AdminTemplate struct {
-	SiteName string
-	AdminTab string
-	AdminUrl string
-	User     string
-	CharSet  string
+	SiteName  string
+	AdminTab  string
+	ActiveTab string
+	AdminUrl  string
+	User      string
+	CharSet   string
 }
 
 func serveAdmin(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +55,14 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 	}
 
-	adm.AdminTab, err = postAdmin(r, user)
+	switch r.FormValue("tab") {
+	case "media":
+		adm.AdminTab, err = mediaAdmin(r)
+		adm.ActiveTab = "media"
+	default:
+		adm.AdminTab, err = postAdmin(r, user)
+		adm.ActiveTab = "posts"
+	}
 	if err != nil {
 		log.Print(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -207,6 +215,36 @@ func postLoad(fileName string) (string, error) {
 		return "", errors.New("unable to read " + fileName + " : " + err.Error())
 	}
 	return html.EscapeString(string(f)), nil
+}
+
+func mediaAdmin(r *http.Request) (string, error) {
+	switch {
+	}
+	return mediaList()
+}
+
+func mediaList() (string, error) {
+	buf := strings.Builder{}
+	buf.WriteString("<H1>Media</H1>\n<TABLE BORDER=\"0\" CELLSPACING=\"10\"><TR>\n")
+	m, err := os.ReadDir(path.Join(*rootDir, *mediaDir))
+	if err != nil {
+		return "", err
+	}
+	for x, i := range m {
+		if i.IsDir() || strings.HasPrefix(i.Name(), ".") ||
+			!(strings.HasSuffix(i.Name(), ".jpg") ||
+				strings.HasSuffix(i.Name(), ".png") ||
+				strings.HasSuffix(i.Name(), ".gif")) {
+			continue
+		}
+		if x%8 == 0 {
+			buf.WriteString("</TR><TR>")
+		}
+		nm := html.EscapeString(i.Name())
+		buf.WriteString("<TD BGCOLOR=\"#D0D0D0\" ALIGN=\"center\" VALIGN=\"bottom\"><IMG SRC=\"/media/" + url.PathEscape(i.Name()) + "\" BORDER=\"0\" TITLE=\"" + nm + "\" ALT=\"" + nm + "\" WIDTH=\"150\"><BR>" + nm + "</TD>\n")
+	}
+	buf.WriteString("</TR></TABLE>\n")
+	return buf.String(), nil
 }
 
 func auth(w http.ResponseWriter, r *http.Request) (string, bool) {
