@@ -1,5 +1,6 @@
 // Admin TODO
 // basename all paths and file names
+// unescape all file names before raw io
 // sort list of articles by user input
 // also sort unpublished
 // search posts
@@ -20,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"html"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -243,6 +245,7 @@ func mediaAdmin(r *http.Request) (string, error) {
 			return "", err
 		}
 		log.Printf("Renamed media %v to %v", r.FormValue("filename"), r.FormValue("rename"))
+
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
 		err := os.Remove(path.Join(*rootDir, *mediaDir, r.FormValue("filename")))
 		if err != nil {
@@ -250,6 +253,33 @@ func mediaAdmin(r *http.Request) (string, error) {
 			return "", err
 		}
 		log.Printf("Deleted media %q", r.FormValue("filename"))
+
+	case r.FormValue("upload") != "":
+		i, h, err := r.FormFile("fileup")
+		if err != nil {
+			log.Printf("Unable to upload file %v", err)
+			return "", err
+		}
+		if h.Filename == "" {
+			return mediaList()
+		}
+		o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(h.Filename)), os.O_RDWR|os.O_CREATE, 0644)
+		if err != nil {
+			log.Printf("Unable to upload file %q: %v", h.Filename, err)
+			return "", err
+		}
+		defer o.Close()
+		oSz, err := io.Copy(o, i)
+		if err != nil {
+			log.Printf("Unable to upload file %q: %v", h.Filename, err)
+			return "", err
+		}
+		if oSz != h.Size {
+			log.Printf("Unable to upload file %q: %v", h.Filename, err)
+			return "", err
+		}
+		log.Printf("Uploaded file %q, size: %v", h.Filename, h.Size)
+		return mediaList()
 	}
 	return mediaList()
 }
@@ -259,7 +289,9 @@ func mediaList() (string, error) {
 	buf.WriteString(`<H1>Media</H1>
 	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="media">
 	<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
-	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this image?');"><P>
+	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this image?');">
+	<INPUT TYPE="SUBMIT" NAME="upload" VALUE="Upload">
+	<INPUT TYPE="FILE" NAME="fileup">
 
 	<TABLE BORDER="0" CELLSPACING="10"><TR>
 	`)
