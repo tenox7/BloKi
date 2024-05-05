@@ -1,5 +1,7 @@
 // Admin TODO
-// sort list of articles
+// basename all paths and file names
+// sort list of articles by user input
+// also sort unpublished
 // search posts
 // post list pagination pagination
 // media management
@@ -84,6 +86,7 @@ func postAdmin(r *http.Request, user string) (string, error) {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
 		}
+		log.Printf("Saved post %q", r.FormValue("filename"))
 		// TODO: idx update single article
 		idx.indexArticles()
 
@@ -92,12 +95,20 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		if !strings.HasSuffix(newname, ".md") {
 			newname = newname + ".md"
 		}
-		os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, newname))
+		err := os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, newname))
+		if err != nil {
+			log.Printf("Unable to rename post from %q to %q: %v", r.FormValue("filename"), newname, err)
+			return "", err
+		}
 		idx.renamePost(r.FormValue("filename"), newname)
-		log.Printf("Renamed %v to %v", r.FormValue("filename"), newname)
+		log.Printf("Renamed post %v to %v", r.FormValue("filename"), newname)
 
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
-		os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
+		err := os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
+		if err != nil {
+			log.Printf("Unable to delete post %q: %v", r.FormValue("filename"), err)
+			return "", err
+		}
 		idx.deletePost(r.FormValue("filename"))
 		log.Printf("Deleted post %q", r.FormValue("filename"))
 
