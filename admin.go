@@ -157,6 +157,7 @@ func postEdit(fn string) (string, error) {
 func postList() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Posts</H1>
+		<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
 		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
 		<INPUT TYPE="SUBMIT" NAME="edit" VALUE="Edit">
 		<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
@@ -235,13 +236,33 @@ func postLoad(fileName string) (string, error) {
 
 func mediaAdmin(r *http.Request) (string, error) {
 	switch {
+	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
+		err := os.Rename(path.Join(*rootDir, *mediaDir, r.FormValue("filename")), path.Join(*rootDir, *mediaDir, r.FormValue("rename")))
+		if err != nil {
+			log.Printf("Unable to rename media from %q to %q: %v", r.FormValue("filename"), r.FormValue("rename"), err)
+			return "", err
+		}
+		log.Printf("Renamed media %v to %v", r.FormValue("filename"), r.FormValue("rename"))
+	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
+		err := os.Remove(path.Join(*rootDir, *mediaDir, r.FormValue("filename")))
+		if err != nil {
+			log.Printf("Unable to delete media %q: %v", r.FormValue("filename"), err)
+			return "", err
+		}
+		log.Printf("Deleted media %q", r.FormValue("filename"))
 	}
 	return mediaList()
 }
 
 func mediaList() (string, error) {
 	buf := strings.Builder{}
-	buf.WriteString("<H1>Media</H1>\n<TABLE BORDER=\"0\" CELLSPACING=\"10\"><TR>\n")
+	buf.WriteString(`<H1>Media</H1>
+	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="media">
+	<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
+	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this image?');"><P>
+
+	<TABLE BORDER="0" CELLSPACING="10"><TR>
+	`)
 	m, err := os.ReadDir(path.Join(*rootDir, *mediaDir))
 	if err != nil {
 		return "", err
@@ -257,7 +278,10 @@ func mediaList() (string, error) {
 			buf.WriteString("</TR><TR>")
 		}
 		nm := html.EscapeString(i.Name())
-		buf.WriteString("<TD BGCOLOR=\"#D0D0D0\" ALIGN=\"center\" VALIGN=\"bottom\"><IMG SRC=\"/media/" + url.PathEscape(i.Name()) + "\" BORDER=\"0\" TITLE=\"" + nm + "\" ALT=\"" + nm + "\" WIDTH=\"150\"><BR>" + nm + "</TD>\n")
+		un := url.PathEscape(i.Name())
+		buf.WriteString("<TD BGCOLOR=\"#D0D0D0\" ALIGN=\"center\" VALIGN=\"bottom\">" +
+			"<IMG SRC=\"/media/" + un + "\" BORDER=\"0\" TITLE=\"" + nm + "\" ALT=\"" + nm + "\" WIDTH=\"150\"><BR>" +
+			"<INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + un + "\">" + nm + "</TD>\n")
 	}
 	buf.WriteString("</TR></TABLE>\n")
 	return buf.String(), nil
