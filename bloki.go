@@ -41,6 +41,7 @@ import (
 	"math"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path"
@@ -159,7 +160,7 @@ func (t *TemplateData) renderArticle(name string) {
 		t.Articles = renderError(name, "not published") // TODO: better error handling
 		return
 	}
-	article, err := os.ReadFile(path.Join(*rootDir, *postsDir, name))
+	article, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(name))))
 	if err != nil {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
@@ -210,7 +211,7 @@ func servePosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveMedia(w http.ResponseWriter, r *http.Request) {
-	f, err := os.ReadFile(filepath.Join(*rootDir, *mediaDir, path.Base(r.URL.Path)))
+	f, err := os.ReadFile(filepath.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.URL.Path))))
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
 		io.WriteString(w, "error")
@@ -335,6 +336,15 @@ func atoiOrZero(s string) int {
 		return 0
 	}
 	return i
+}
+
+func unescapeOrEmpty(s string) string {
+	u, err := url.QueryUnescape(s)
+	if err != nil {
+		log.Printf("unescape: %q err=%v", s, err)
+		return ""
+	}
+	return u
 }
 
 func userId(usr string) (int, int, error) {
