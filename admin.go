@@ -310,10 +310,14 @@ func mediaList() (string, error) {
 			buf.WriteString("</TR><TR>")
 		}
 		nm := html.EscapeString(i.Name())
-		un := url.PathEscape(i.Name())
-		buf.WriteString("<TD BGCOLOR=\"#D0D0D0\" ALIGN=\"center\" VALIGN=\"bottom\">" +
-			"<IMG SRC=\"/media/" + un + "\" BORDER=\"0\" TITLE=\"" + nm + "\" ALT=\"" + nm + "\" WIDTH=\"150\"><BR>" +
-			"<INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + un + "\">" + nm + "</TD>\n")
+		un := url.QueryEscape(i.Name())
+		buf.WriteString(`
+			<TD BGCOLOR="#D0D0D0" ALIGN="center" VALIGN="bottom">
+			<A HREF="/media/` + un + `">
+			<IMG SRC="/media/` + un + `" BORDER="0" TITLE="` + nm + `" ALT="` + nm + `" WIDTH="150"></A><BR>
+			<INPUT TYPE="radio" NAME="filename" VALUE="` + un + `">
+			<A HREF="/media/` + un + `">` + nm + `</A></TD>
+		`)
 	}
 	buf.WriteString("</TR></TABLE>\n")
 	return buf.String(), nil
