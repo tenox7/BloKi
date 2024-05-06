@@ -1,7 +1,5 @@
 // Admin TODO
 // media list sort & search
-// basename all paths and file names
-// unescape all file names before raw io
 // sort list of articles by user input
 // also sort unpublished
 // search posts
