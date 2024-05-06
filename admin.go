@@ -1,4 +1,5 @@
 // Admin TODO
+// media list sort & search
 // basename all paths and file names
 // unescape all file names before raw io
 // sort list of articles by user input
@@ -93,33 +94,39 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		idx.indexArticles()
 
 	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
+		oldname := path.Base(unescapeOrEmpty(r.FormValue("filename")))
 		newname := r.FormValue("rename")
 		if !strings.HasSuffix(newname, ".md") {
 			newname = newname + ".md"
 		}
-		err := os.Rename(path.Join(*rootDir, *postsDir, r.FormValue("filename")), path.Join(*rootDir, *postsDir, newname))
+		newname = path.Base(unescapeOrEmpty(newname))
+		err := os.Rename(
+			path.Join(*rootDir, *postsDir, oldname),
+			path.Join(*rootDir, *postsDir, newname),
+		)
 		if err != nil {
 			log.Printf("Unable to rename post from %q to %q: %v", r.FormValue("filename"), newname, err)
 			return "", err
 		}
-		idx.renamePost(r.FormValue("filename"), newname)
+		idx.renamePost(oldname, newname)
 		log.Printf("Renamed post %v to %v", r.FormValue("filename"), newname)
 
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
-		err := os.Remove(path.Join(*rootDir, *postsDir, r.FormValue("filename")))
+		filename := path.Base(unescapeOrEmpty(r.FormValue("filename")))
+		err := os.Remove(path.Join(*rootDir, *postsDir, filename))
 		if err != nil {
 			log.Printf("Unable to delete post %q: %v", r.FormValue("filename"), err)
 			return "", err
 		}
 		idx.deletePost(r.FormValue("filename"))
-		log.Printf("Deleted post %q", r.FormValue("filename"))
+		log.Printf("Deleted post %q", filename)
 
 	case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
 		filename := r.FormValue("newpost")
 		if !strings.HasSuffix(filename, ".md") {
 			filename = filename + ".md"
 		}
-		_, err := os.Stat(path.Join(*rootDir, *postsDir, filename))
+		_, err := os.Stat(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(filename))))
 		if err == nil {
 			return "", fmt.Errorf("new post file %q already exists", filename)
 		}
@@ -192,7 +199,7 @@ func postList() (string, error) {
 		}
 		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
 			"<TD><INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + a + "\">&nbsp;" +
-			"<A HREF=\"/" + url.PathEscape(strings.TrimSuffix(a, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(a) + "</A></TD>" +
+			"<A HREF=\"/" + url.QueryEscape(strings.TrimSuffix(a, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(a) + "</A></TD>" +
 			"<TD>" + idx.metaData[a].author + "</TD>" +
 			"<TD>" + p + "</TD>" +
 			"<TD>" + idx.metaData[a].modified.Format(timeFormat) + "</TD></TR>\n")
@@ -208,7 +215,7 @@ func postSave(fileName, postText string) error {
 	if fileName == "" {
 		return nil
 	}
-	fullFilename := path.Join(*rootDir, *postsDir, fileName)
+	fullFilename := path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName)))
 	log.Printf("Saving %q", fullFilename)
 	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
 	if err != nil {
@@ -229,7 +236,7 @@ func postSave(fileName, postText string) error {
 }
 
 func postLoad(fileName string) (string, error) {
-	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, fileName))
+	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName))))
 	if err != nil {
 		return "", errors.New("unable to read " + fileName + " : " + err.Error())
 	}
@@ -239,7 +246,10 @@ func postLoad(fileName string) (string, error) {
 func mediaAdmin(r *http.Request) (string, error) {
 	switch {
 	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
-		err := os.Rename(path.Join(*rootDir, *mediaDir, r.FormValue("filename")), path.Join(*rootDir, *mediaDir, r.FormValue("rename")))
+		err := os.Rename(
+			path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.FormValue("filename")))),
+			path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.FormValue("rename")))),
+		)
 		if err != nil {
 			log.Printf("Unable to rename media from %q to %q: %v", r.FormValue("filename"), r.FormValue("rename"), err)
 			return "", err
@@ -247,7 +257,7 @@ func mediaAdmin(r *http.Request) (string, error) {
 		log.Printf("Renamed media %v to %v", r.FormValue("filename"), r.FormValue("rename"))
 
 	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
-		err := os.Remove(path.Join(*rootDir, *mediaDir, r.FormValue("filename")))
+		err := os.Remove(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.FormValue("filename")))))
 		if err != nil {
 			log.Printf("Unable to delete media %q: %v", r.FormValue("filename"), err)
 			return "", err
@@ -263,7 +273,7 @@ func mediaAdmin(r *http.Request) (string, error) {
 		if h.Filename == "" {
 			return mediaList()
 		}
-		o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(h.Filename)), os.O_RDWR|os.O_CREATE, 0644)
+		o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(h.Filename))), os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
 			log.Printf("Unable to upload file %q: %v", h.Filename, err)
 			return "", err

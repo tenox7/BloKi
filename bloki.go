@@ -154,7 +154,7 @@ func renderError(name, errStr string) string {
 
 func (t *TemplateData) renderArticle(name string) {
 	idx.RLock()
-	m := idx.metaData[name]
+	m := idx.metaData[path.Base(unescapeOrEmpty(name))]
 	idx.RUnlock()
 	if m.published.Equal(time.Unix(0, 0)) {
 		t.Articles = renderError(name, "not published") // TODO: better error handling
