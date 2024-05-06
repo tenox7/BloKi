@@ -3,8 +3,7 @@
 // sort list of articles by user input
 // also sort unpublished
 // search posts
-// post list pagination pagination
-// media management
+// post list pagination
 // user management
 // stats
 

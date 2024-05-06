@@ -4,7 +4,9 @@ package main
 // TODO:
 // index update for a single file + re-run sequence
 // make admin save/rename/delete use that
-// reindex on signal
+// service files, etc
+// git integration
+//
 // 2fa for admin login, probably
 // https://www.twilio.com/docs/verify/quickstarts/totp
 // user manager
@@ -19,9 +21,7 @@ package main
 // wiki mode
 // startup wizard
 // statistics module, page views, latencies, etc
-// service files, etc
-// git integration
-// make robots.txt configurable
+
 // docker container
 // cloud run, fargate
 // lambda, cloud functions
@@ -30,6 +30,8 @@ package main
 // MAYBE:
 // constant make width - 1000px in WP?
 // reindex on inotify (incl rename/move)
+// rendered html article cache
+// reindex on signal
 
 import (
 	"crypto/tls"
