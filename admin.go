@@ -49,7 +49,7 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
 	r.ParseMultipartForm(10 << 20)
 	c := creds{}
-	user, ok := c.auth(w, r)
+	user, ok := c.user(w, r)
 	if !ok {
 		return
 	}
@@ -337,14 +337,14 @@ func (media) mediaList() (string, error) {
 	return buf.String(), nil
 }
 
-func (c creds) auth(w http.ResponseWriter, r *http.Request) (string, bool) {
+func (c creds) user(w http.ResponseWriter, r *http.Request) (string, bool) {
 	if *secrets == "" || secretsStore == nil {
 		http.Error(w, "unable to get user db", http.StatusUnauthorized)
 		return "", false
 	}
 	u, p, ok := r.BasicAuth()
 	if ok {
-		if c.userCheck(u, p) {
+		if c.check(u, p) {
 			return u, true
 		}
 	}
@@ -354,7 +354,7 @@ func (c creds) auth(w http.ResponseWriter, r *http.Request) (string, bool) {
 	return "", false
 }
 
-func (creds) userCheck(user, pass string) bool {
+func (creds) check(user, pass string) bool {
 	jpwd, err := secretsStore.Get(nil, "user:"+user)
 	if err != nil {
 		return false
@@ -368,7 +368,7 @@ func (creds) userCheck(user, pass string) bool {
 	return subtle.ConstantTimeCompare([]byte(hash), []byte(spwd.Hash)) == 1
 }
 
-func (creds) userSet(user, pass string) error {
+func (creds) set(user, pass string) error {
 	if *secrets == "" || secretsStore == nil {
 		return errors.New("unable to open user db")
 	}
@@ -386,14 +386,14 @@ func (creds) userSet(user, pass string) error {
 	return secretsStore.Put(nil, "user:"+user, spwd)
 }
 
-func (creds) userDel(user string) error {
+func (creds) del(user string) error {
 	if *secrets == "" || secretsStore == nil {
 		return errors.New("unable to open user db")
 	}
 	return secretsStore.Delete(nil, "user:"+user)
 }
 
-func (c creds) manageUsers() {
+func (c creds) manager() {
 	switch flag.Arg(1) {
 	case "passwd":
 		if flag.Arg(2) == "" {
@@ -402,7 +402,7 @@ func (c creds) manageUsers() {
 		var pwd string
 		fmt.Print("New Password (WILL ECHO): ")
 		fmt.Scanln(&pwd)
-		err := c.userSet(flag.Arg(2), pwd)
+		err := c.set(flag.Arg(2), pwd)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -410,7 +410,7 @@ func (c creds) manageUsers() {
 		if flag.Arg(2) == "" {
 			log.Fatal("usage: bloki user delete <username>")
 		}
-		err := c.userDel(flag.Arg(2))
+		err := c.del(flag.Arg(2))
 		if err != nil {
 			log.Fatal(err)
 		}
