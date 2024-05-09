@@ -186,7 +186,7 @@ func (t *TemplateData) paginatePosts(pg int) {
 	}
 }
 
-func servePosts(w http.ResponseWriter, r *http.Request) {
+func handlePosts(w http.ResponseWriter, r *http.Request) {
 	log.Printf("view from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
 	fi := path.Base(r.URL.Path)
 
@@ -212,7 +212,7 @@ func servePosts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func serveMedia(w http.ResponseWriter, r *http.Request) {
+func handleMedia(w http.ResponseWriter, r *http.Request) {
 	f, err := os.ReadFile(filepath.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.URL.Path))))
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
@@ -224,12 +224,12 @@ func serveMedia(w http.ResponseWriter, r *http.Request) {
 	w.Write(f)
 }
 
-func serveFavicon(w http.ResponseWriter, r *http.Request) {
+func handleFavicon(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "image/x-icon")
 	w.Write(favIcon)
 }
 
-func serveRobots(w http.ResponseWriter, r *http.Request) {
+func handleRobots(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain")
 	fmt.Fprint(w, "User-agent: *\nAllow: /\n")
 }
@@ -401,11 +401,11 @@ func main() {
 	flag.Parse()
 
 	// http handlers
-	http.HandleFunc("/", servePosts)
-	http.HandleFunc("/media/", serveMedia)
-	http.HandleFunc(*adminUri, serveAdmin)
-	http.HandleFunc("/robots.txt", serveRobots)
-	http.HandleFunc("/favicon.ico", serveFavicon)
+	http.HandleFunc("/", handlePosts)
+	http.HandleFunc("/media/", handleMedia)
+	http.HandleFunc(*adminUri, handleAdmin)
+	http.HandleFunc("/robots.txt", handleRobots)
+	http.HandleFunc("/favicon.ico", handleFavicon)
 
 	// open secrets before chroot
 	if *secrets != "" {

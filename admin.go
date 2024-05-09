@@ -45,7 +45,7 @@ type post struct{}
 type media struct{}
 type creds struct{}
 
-func serveAdmin(w http.ResponseWriter, r *http.Request) {
+func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
 	r.ParseMultipartForm(10 << 20)
 	c := creds{}
