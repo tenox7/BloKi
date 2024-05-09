@@ -343,10 +343,8 @@ func (c creds) user(w http.ResponseWriter, r *http.Request) (string, bool) {
 		return "", false
 	}
 	u, p, ok := r.BasicAuth()
-	if ok {
-		if c.check(u, p) {
-			return u, true
-		}
+	if ok && c.auth(u, p) {
+		return u, true
 	}
 	log.Printf("Unauthorized %q from %q", u, r.RemoteAddr)
 	w.Header().Set("WWW-Authenticate", "Basic realm=\"BloKi "+*siteName+"\"")
@@ -354,7 +352,7 @@ func (c creds) user(w http.ResponseWriter, r *http.Request) (string, bool) {
 	return "", false
 }
 
-func (creds) check(user, pass string) bool {
+func (creds) auth(user, pass string) bool {
 	jpwd, err := secretsStore.Get(nil, "user:"+user)
 	if err != nil {
 		return false
