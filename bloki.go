@@ -418,7 +418,8 @@ func main() {
 
 	// manage users
 	if flag.Arg(0) == "user" {
-		manageUsers()
+		c := creds{}
+		c.manageUsers()
 		return
 	}
 

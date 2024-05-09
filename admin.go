@@ -41,10 +41,15 @@ type AdminTemplate struct {
 	CharSet   string
 }
 
+type post struct{}
+type media struct{}
+type creds struct{}
+
 func serveAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
 	r.ParseMultipartForm(10 << 20)
-	user, ok := auth(w, r)
+	c := creds{}
+	user, ok := c.auth(w, r)
 	if !ok {
 		return
 	}
@@ -59,10 +64,12 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 
 	switch r.FormValue("tab") {
 	case "media":
-		adm.AdminTab, err = mediaAdmin(r)
+		m := media{}
+		adm.AdminTab, err = m.mediaAdmin(r)
 		adm.ActiveTab = "media"
 	default:
-		adm.AdminTab, err = postAdmin(r, user)
+		m := post{}
+		adm.AdminTab, err = m.serve(r, user)
 		adm.ActiveTab = "posts"
 	}
 	if err != nil {
@@ -75,13 +82,13 @@ func serveAdmin(w http.ResponseWriter, r *http.Request) {
 	templates["admin"].Execute(w, adm)
 }
 
-func postAdmin(r *http.Request, user string) (string, error) {
+func (m post) serve(r *http.Request, user string) (string, error) {
 	switch {
 	case r.FormValue("edit") != "" && r.FormValue("filename") != "":
-		return postEdit(r.FormValue("filename"))
+		return m.edit(r.FormValue("filename"))
 
 	case r.FormValue("save") != "" && r.FormValue("filename") != "":
-		err := postSave(r.FormValue("filename"), r.FormValue("textdata"))
+		err := m.save(r.FormValue("filename"), r.FormValue("textdata"))
 		if err != nil {
 			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
 			return "", err
@@ -127,7 +134,7 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		if err == nil {
 			return "", fmt.Errorf("new post file %q already exists", filename)
 		}
-		err = postSave(filename,
+		err = m.save(filename,
 			"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
 		if err != nil {
 			log.Printf("Unable to save post %q: %v", filename, err)
@@ -136,14 +143,14 @@ func postAdmin(r *http.Request, user string) (string, error) {
 		log.Printf("Created new post %q", filename)
 		// TODO: idx update single article
 		idx.indexArticles()
-		return postEdit(filename)
+		return m.edit(filename)
 	}
-	return postList()
+	return m.list()
 }
 
 // perhaps we should have update in place, save and reopen
-func postEdit(fn string) (string, error) {
-	data, err := postLoad(fn)
+func (m post) edit(fn string) (string, error) {
+	data, err := m.load(fn)
 	if err != nil {
 		return "", errors.New("Unable to open " + fn)
 	}
@@ -160,7 +167,7 @@ func postEdit(fn string) (string, error) {
 
 // TODO: I think that edit should be default action on a post and view could be in a secondary column in the table?
 // or better no view rather preview from inside the post
-func postList() (string, error) {
+func (post) list() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Posts</H1>
 		<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
@@ -208,7 +215,7 @@ func postList() (string, error) {
 	return buf.String(), nil
 }
 
-func postSave(fileName, postText string) error {
+func (post) save(fileName, postText string) error {
 	if fileName == "" {
 		return nil
 	}
@@ -232,7 +239,7 @@ func postSave(fileName, postText string) error {
 	return nil
 }
 
-func postLoad(fileName string) (string, error) {
+func (post) load(fileName string) (string, error) {
 	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName))))
 	if err != nil {
 		return "", errors.New("unable to read " + fileName + " : " + err.Error())
@@ -240,7 +247,7 @@ func postLoad(fileName string) (string, error) {
 	return html.EscapeString(string(f)), nil
 }
 
-func mediaAdmin(r *http.Request) (string, error) {
+func (m media) mediaAdmin(r *http.Request) (string, error) {
 	switch {
 	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
 		err := os.Rename(
@@ -268,7 +275,7 @@ func mediaAdmin(r *http.Request) (string, error) {
 			return "", err
 		}
 		if h.Filename == "" {
-			return mediaList()
+			return m.mediaList()
 		}
 		o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(h.Filename))), os.O_RDWR|os.O_CREATE, 0644)
 		if err != nil {
@@ -286,12 +293,12 @@ func mediaAdmin(r *http.Request) (string, error) {
 			return "", err
 		}
 		log.Printf("Uploaded file %q, size: %v", h.Filename, h.Size)
-		return mediaList()
+		return m.mediaList()
 	}
-	return mediaList()
+	return m.mediaList()
 }
 
-func mediaList() (string, error) {
+func (media) mediaList() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Media</H1>
 	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="media">
@@ -330,14 +337,14 @@ func mediaList() (string, error) {
 	return buf.String(), nil
 }
 
-func auth(w http.ResponseWriter, r *http.Request) (string, bool) {
+func (c creds) auth(w http.ResponseWriter, r *http.Request) (string, bool) {
 	if *secrets == "" || secretsStore == nil {
 		http.Error(w, "unable to get user db", http.StatusUnauthorized)
 		return "", false
 	}
 	u, p, ok := r.BasicAuth()
 	if ok {
-		if userCheck(u, p) {
+		if c.userCheck(u, p) {
 			return u, true
 		}
 	}
@@ -347,7 +354,7 @@ func auth(w http.ResponseWriter, r *http.Request) (string, bool) {
 	return "", false
 }
 
-func userCheck(user, pass string) bool {
+func (creds) userCheck(user, pass string) bool {
 	jpwd, err := secretsStore.Get(nil, "user:"+user)
 	if err != nil {
 		return false
@@ -361,7 +368,7 @@ func userCheck(user, pass string) bool {
 	return subtle.ConstantTimeCompare([]byte(hash), []byte(spwd.Hash)) == 1
 }
 
-func userSet(user, pass string) error {
+func (creds) userSet(user, pass string) error {
 	if *secrets == "" || secretsStore == nil {
 		return errors.New("unable to open user db")
 	}
@@ -379,14 +386,14 @@ func userSet(user, pass string) error {
 	return secretsStore.Put(nil, "user:"+user, spwd)
 }
 
-func userDel(user string) error {
+func (creds) userDel(user string) error {
 	if *secrets == "" || secretsStore == nil {
 		return errors.New("unable to open user db")
 	}
 	return secretsStore.Delete(nil, "user:"+user)
 }
 
-func manageUsers() {
+func (c creds) manageUsers() {
 	switch flag.Arg(1) {
 	case "passwd":
 		if flag.Arg(2) == "" {
@@ -395,7 +402,7 @@ func manageUsers() {
 		var pwd string
 		fmt.Print("New Password (WILL ECHO): ")
 		fmt.Scanln(&pwd)
-		err := userSet(flag.Arg(2), pwd)
+		err := c.userSet(flag.Arg(2), pwd)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -403,7 +410,7 @@ func manageUsers() {
 		if flag.Arg(2) == "" {
 			log.Fatal("usage: bloki user delete <username>")
 		}
-		err := userDel(flag.Arg(2))
+		err := c.userDel(flag.Arg(2))
 		if err != nil {
 			log.Fatal(err)
 		}
