@@ -53,7 +53,6 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 	}
 
-out:
 	switch r.FormValue("tab") {
 	case "media":
 		m := media{}
@@ -81,17 +80,7 @@ out:
 		case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
 			adm.AdminTab, err = m.new(r.FormValue("newpost"), user)
 		case r.FormValue("save") != "" && r.FormValue("filename") != "":
-			// TODO: convert to return m.list() ??
-			err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
-			if err != nil {
-				log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
-				break out
-			}
-			log.Printf("Saved post %q", r.FormValue("filename"))
-			// TODO: idx update single article
-			idx.indexArticles()
-			adm.AdminTab, err = m.list()
-
+			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
 		default:
 			adm.AdminTab, err = m.list()
 		}
@@ -115,7 +104,7 @@ func (m post) new(file, user string) (string, error) {
 	if err == nil {
 		return "", fmt.Errorf("new post file %q already exists", file)
 	}
-	err = m.save(file,
+	_, err = m.save(file,
 		"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
 	if err != nil {
 		log.Printf("Unable to save post %q: %v", file, err)
@@ -224,28 +213,28 @@ func (post) list() (string, error) {
 	return buf.String(), nil
 }
 
-func (m post) save(fileName, postText string) error {
-	if fileName == "" {
-		return nil
-	}
+func (m post) save(fileName, postText string) (string, error) {
 	fullFilename := path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName)))
 	log.Printf("Saving %q", fullFilename)
 	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
 	if err != nil {
-		return errors.New("unable to write temp file for %q: " + err.Error())
+		return "", errors.New("unable to write temp file for %q: " + err.Error())
 	}
 	st, err := os.Stat(fullFilename + ".tmp")
 	if err != nil {
-		return errors.New("unable to stat temp file for %q: " + err.Error())
+		return "", errors.New("unable to stat temp file for %q: " + err.Error())
 	}
 	if st.Size() != int64(len(postText)) {
-		return errors.New("temp file size != input size")
+		return "", errors.New("temp file size != input size")
 	}
 	err = os.Rename(fullFilename+".tmp", fullFilename)
 	if err != nil {
-		return errors.New("unable to rename temp file to the target file: " + err.Error())
+		return "", errors.New("unable to rename temp file to the target file: " + err.Error())
 	}
-	return nil
+	log.Printf("Saved post %q", fileName)
+	// TODO: idx update single article
+	idx.indexArticles()
+	return m.list()
 }
 
 func (post) load(fileName string) (string, error) {
