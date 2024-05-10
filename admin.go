@@ -1,12 +1,3 @@
-// Admin TODO
-// media list sort & search
-// sort list of articles by user input
-// also sort unpublished
-// search posts
-// post list pagination
-// user management
-// stats
-
 package main
 
 import (
