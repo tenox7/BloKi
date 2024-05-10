@@ -225,11 +225,11 @@ func (post) list() (string, error) {
 	return buf.String(), nil
 }
 
-func (m post) save(fileName, postText string) (string, error) {
-	if fileName == "" {
+func (m post) save(file, postText string) (string, error) {
+	if file == "" {
 		return m.list()
 	}
-	fullFilename := path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName)))
+	fullFilename := path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(file)))
 	log.Printf("Saving %q", fullFilename)
 	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
 	if err != nil {
@@ -246,16 +246,16 @@ func (m post) save(fileName, postText string) (string, error) {
 	if err != nil {
 		return "", errors.New("unable to rename temp file to the target file: " + err.Error())
 	}
-	log.Printf("Saved post %q", fileName)
+	log.Printf("Saved post %q", file)
 	// TODO: idx update single article
 	idx.indexArticles()
 	return m.list()
 }
 
-func (post) load(fileName string) (string, error) {
-	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName))))
+func (post) load(file string) (string, error) {
+	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(file))))
 	if err != nil {
-		return "", errors.New("unable to read " + fileName + " : " + err.Error())
+		return "", errors.New("unable to read " + file + " : " + err.Error())
 	}
 	return html.EscapeString(string(f)), nil
 }
