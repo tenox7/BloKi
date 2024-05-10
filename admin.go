@@ -58,9 +58,9 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		m := media{}
 		adm.ActiveTab = "media"
 		switch {
-		case r.FormValue("rename") != "" && r.FormValue("filename") != "":
+		case r.FormValue("rename") != "":
 			adm.AdminTab, err = m.rename(r.FormValue("filename"), r.FormValue("rename"))
-		case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
+		case r.FormValue("delete") == "true":
 			adm.AdminTab, err = m.delete(r.FormValue("filename"))
 		case r.FormValue("upload") != "":
 			adm.AdminTab, err = m.upload(r)
@@ -71,15 +71,15 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		m := post{}
 		adm.ActiveTab = "posts"
 		switch {
-		case r.FormValue("edit") != "" && r.FormValue("filename") != "":
+		case r.FormValue("edit") != "":
 			adm.AdminTab, err = m.edit(r.FormValue("filename"))
-		case r.FormValue("rename") != "" && r.FormValue("filename") != "":
+		case r.FormValue("rename") != "":
 			adm.AdminTab, err = m.rename(r.FormValue("filename"), r.FormValue("rename"))
-		case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
+		case r.FormValue("delete") == "true":
 			adm.AdminTab, err = m.delete(r.FormValue("filename"))
-		case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
+		case r.FormValue("newpost") != "":
 			adm.AdminTab, err = m.new(r.FormValue("newpost"), user)
-		case r.FormValue("save") != "" && r.FormValue("filename") != "":
+		case r.FormValue("save") != "":
 			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
 		default:
 			adm.AdminTab, err = m.list()
@@ -96,6 +96,9 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m post) new(file, user string) (string, error) {
+	if file == "" || file == "null" {
+		return m.list()
+	}
 	file = path.Base(unescapeOrEmpty(file))
 	if !strings.HasSuffix(file, ".md") {
 		file = file + ".md"
@@ -117,6 +120,9 @@ func (m post) new(file, user string) (string, error) {
 }
 
 func (m post) delete(file string) (string, error) {
+	if file == "" {
+		return m.list()
+	}
 	file = path.Base(unescapeOrEmpty(file))
 	err := os.Remove(path.Join(*rootDir, *postsDir, file))
 	if err != nil {
@@ -129,6 +135,9 @@ func (m post) delete(file string) (string, error) {
 }
 
 func (m post) rename(old, new string) (string, error) {
+	if old == "" || new == "" {
+		return m.list()
+	}
 	old = path.Base(unescapeOrEmpty(old))
 	new = path.Base(unescapeOrEmpty(new))
 	if !strings.HasSuffix(new, ".md") {
@@ -148,18 +157,21 @@ func (m post) rename(old, new string) (string, error) {
 }
 
 // perhaps we should have update in place, save and reopen
-func (m post) edit(fn string) (string, error) {
-	data, err := m.load(fn)
+func (m post) edit(file string) (string, error) {
+	if file == "" {
+		return m.list()
+	}
+	data, err := m.load(file)
 	if err != nil {
-		return "", errors.New("Unable to open " + fn)
+		return "", errors.New("Unable to open " + file)
 	}
 	buf := strings.Builder{}
-	buf.WriteString("<H1>Editing - " + html.EscapeString(fn) +
+	buf.WriteString("<H1>Editing - " + html.EscapeString(file) +
 		"</H1>\n" +
 		"<TEXTAREA NAME=\"textdata\" SPELLCHECK=\"true\" COLS=\"80\" ROWS=\"24\" WRAP=\"soft\" STYLE=\"width: 99%; height: 99%;\">\n" +
 		data + "</TEXTAREA><P>\n" +
 		"<INPUT TYPE=\"SUBMIT\" NAME=\"save\" VALUE=\"Save\"> <INPUT TYPE=\"SUBMIT\" NAME=\"cancel\" VALUE=\"Cancel\"><P>\n" +
-		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + html.EscapeString(fn) + "\">\n",
+		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + html.EscapeString(file) + "\">\n",
 	)
 	return buf.String(), nil
 }
@@ -214,6 +226,9 @@ func (post) list() (string, error) {
 }
 
 func (m post) save(fileName, postText string) (string, error) {
+	if fileName == "" {
+		return m.list()
+	}
 	fullFilename := path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(fileName)))
 	log.Printf("Saving %q", fullFilename)
 	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
@@ -274,6 +289,9 @@ func (m media) upload(r *http.Request) (string, error) {
 }
 
 func (m media) rename(old, new string) (string, error) {
+	if old == "" || new == "" {
+		return m.list()
+	}
 	err := os.Rename(
 		path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(old))),
 		path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(new))),
@@ -287,6 +305,9 @@ func (m media) rename(old, new string) (string, error) {
 }
 
 func (m media) delete(file string) (string, error) {
+	if file == "" {
+		return m.list()
+	}
 	err := os.Remove(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(file))))
 	if err != nil {
 		log.Printf("Unable to delete media %q: %v", file, err)

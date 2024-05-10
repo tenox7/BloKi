@@ -43,3 +43,4 @@
 - 2fa for admin login, probably
 - https:www.twilio.com/docs/verify/quickstarts/totp
 - user manager
+- better error messages than text
