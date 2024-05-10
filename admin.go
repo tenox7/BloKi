@@ -65,8 +65,17 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	switch r.FormValue("tab") {
 	case "media":
 		m := media{}
-		adm.AdminTab, err = m.mediaAdmin(r)
 		adm.ActiveTab = "media"
+		switch {
+		case r.FormValue("rename") != "" && r.FormValue("filename") != "":
+			adm.AdminTab, err = m.rename(r.FormValue("filename"), r.FormValue("rename"))
+		case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
+			adm.AdminTab, err = m.delete(r.FormValue("filename"))
+		case r.FormValue("upload") != "":
+			adm.AdminTab, err = m.upload(r)
+		default:
+			adm.AdminTab, err = m.list()
+		}
 	default:
 		m := post{}
 		adm.AdminTab, err = m.serve(r, user)
@@ -247,65 +256,65 @@ func (post) load(fileName string) (string, error) {
 	return html.EscapeString(string(f)), nil
 }
 
-func (m media) mediaAdmin(r *http.Request) (string, error) {
-	switch {
-	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
-		err := os.Rename(
-			path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.FormValue("filename")))),
-			path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.FormValue("rename")))),
-		)
-		if err != nil {
-			log.Printf("Unable to rename media from %q to %q: %v", r.FormValue("filename"), r.FormValue("rename"), err)
-			return "", err
-		}
-		log.Printf("Renamed media %v to %v", r.FormValue("filename"), r.FormValue("rename"))
-
-	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
-		err := os.Remove(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(r.FormValue("filename")))))
-		if err != nil {
-			log.Printf("Unable to delete media %q: %v", r.FormValue("filename"), err)
-			return "", err
-		}
-		log.Printf("Deleted media %q", r.FormValue("filename"))
-
-	case r.FormValue("upload") != "":
-		i, h, err := r.FormFile("fileup")
-		if err != nil {
-			log.Printf("Unable to upload file %v", err)
-			return "", err
-		}
-		if h.Filename == "" {
-			return m.mediaList()
-		}
-		o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(h.Filename))), os.O_RDWR|os.O_CREATE, 0644)
-		if err != nil {
-			log.Printf("Unable to upload file %q: %v", h.Filename, err)
-			return "", err
-		}
-		defer o.Close()
-		oSz, err := io.Copy(o, i)
-		if err != nil {
-			log.Printf("Unable to upload file %q: %v", h.Filename, err)
-			return "", err
-		}
-		if oSz != h.Size {
-			log.Printf("Unable to upload file %q: %v", h.Filename, err)
-			return "", err
-		}
-		log.Printf("Uploaded file %q, size: %v", h.Filename, h.Size)
-		return m.mediaList()
+func (m media) upload(r *http.Request) (string, error) {
+	i, h, err := r.FormFile("fileup")
+	if err != nil {
+		log.Printf("Unable to upload file %v", err)
+		return "", err
 	}
-	return m.mediaList()
+	if h.Filename == "" {
+		return m.list()
+	}
+	o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(h.Filename))), os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		log.Printf("Unable to upload file %q: %v", h.Filename, err)
+		return "", err
+	}
+	defer o.Close()
+	oSz, err := io.Copy(o, i)
+	if err != nil {
+		log.Printf("Unable to upload file %q: %v", h.Filename, err)
+		return "", err
+	}
+	if oSz != h.Size {
+		log.Printf("Unable to upload file %q: %v", h.Filename, err)
+		return "", err
+	}
+	log.Printf("Uploaded file %q, size: %v", h.Filename, h.Size)
+	return m.list()
 }
 
-func (media) mediaList() (string, error) {
+func (m media) rename(old, new string) (string, error) {
+	err := os.Rename(
+		path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(old))),
+		path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(new))),
+	)
+	if err != nil {
+		log.Printf("Unable to rename media from %q to %q: %v", old, new, err)
+		return "", err
+	}
+	log.Printf("Renamed media %q to %q", old, new)
+	return m.list()
+}
+
+func (m media) delete(file string) (string, error) {
+	err := os.Remove(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(file))))
+	if err != nil {
+		log.Printf("Unable to delete media %q: %v", file, err)
+		return "", err
+	}
+	log.Printf("Deleted media %q", file)
+	return m.list()
+}
+
+func (media) list() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Media</H1>
 	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="media">
 	<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
 	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this image?');">
-	<INPUT TYPE="SUBMIT" NAME="upload" VALUE="Upload">
 	<INPUT TYPE="FILE" NAME="fileup">
+	<INPUT TYPE="SUBMIT" NAME="upload" VALUE="Upload">
 
 	<TABLE BORDER="0" CELLSPACING="10"><TR>
 	`)
