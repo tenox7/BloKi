@@ -53,6 +53,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 	}
 
+out:
 	switch r.FormValue("tab") {
 	case "media":
 		m := media{}
@@ -69,8 +70,31 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		}
 	default:
 		m := post{}
-		adm.AdminTab, err = m.serve(r, user)
 		adm.ActiveTab = "posts"
+		switch {
+		case r.FormValue("edit") != "" && r.FormValue("filename") != "":
+			adm.AdminTab, err = m.edit(r.FormValue("filename"))
+		case r.FormValue("rename") != "" && r.FormValue("filename") != "":
+			adm.AdminTab, err = m.rename(r.FormValue("filename"), r.FormValue("rename"))
+		case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
+			adm.AdminTab, err = m.delete(r.FormValue("filename"))
+		case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
+			adm.AdminTab, err = m.new(r.FormValue("newpost"), user)
+		case r.FormValue("save") != "" && r.FormValue("filename") != "":
+			// TODO: convert to return m.list() ??
+			err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
+			if err != nil {
+				log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
+				break out
+			}
+			log.Printf("Saved post %q", r.FormValue("filename"))
+			// TODO: idx update single article
+			idx.indexArticles()
+			adm.AdminTab, err = m.list()
+
+		default:
+			adm.AdminTab, err = m.list()
+		}
 	}
 	if err != nil {
 		log.Print(err)
@@ -82,69 +106,55 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	templates["admin"].Execute(w, adm)
 }
 
-func (m post) serve(r *http.Request, user string) (string, error) {
-	switch {
-	case r.FormValue("edit") != "" && r.FormValue("filename") != "":
-		return m.edit(r.FormValue("filename"))
-
-	case r.FormValue("save") != "" && r.FormValue("filename") != "":
-		err := m.save(r.FormValue("filename"), r.FormValue("textdata"))
-		if err != nil {
-			log.Printf("Unable to save post %q: %v", r.FormValue("filename"), err)
-			return "", err
-		}
-		log.Printf("Saved post %q", r.FormValue("filename"))
-		// TODO: idx update single article
-		idx.indexArticles()
-
-	case r.FormValue("rename") != "" && r.FormValue("filename") != "":
-		oldname := path.Base(unescapeOrEmpty(r.FormValue("filename")))
-		newname := r.FormValue("rename")
-		if !strings.HasSuffix(newname, ".md") {
-			newname = newname + ".md"
-		}
-		newname = path.Base(unescapeOrEmpty(newname))
-		err := os.Rename(
-			path.Join(*rootDir, *postsDir, oldname),
-			path.Join(*rootDir, *postsDir, newname),
-		)
-		if err != nil {
-			log.Printf("Unable to rename post from %q to %q: %v", r.FormValue("filename"), newname, err)
-			return "", err
-		}
-		idx.renamePost(oldname, newname)
-		log.Printf("Renamed post %v to %v", r.FormValue("filename"), newname)
-
-	case r.FormValue("delete") == "true" && r.FormValue("filename") != "":
-		filename := path.Base(unescapeOrEmpty(r.FormValue("filename")))
-		err := os.Remove(path.Join(*rootDir, *postsDir, filename))
-		if err != nil {
-			log.Printf("Unable to delete post %q: %v", r.FormValue("filename"), err)
-			return "", err
-		}
-		idx.deletePost(r.FormValue("filename"))
-		log.Printf("Deleted post %q", filename)
-
-	case r.FormValue("newpost") != "" && r.FormValue("newpost") != "null":
-		filename := r.FormValue("newpost")
-		if !strings.HasSuffix(filename, ".md") {
-			filename = filename + ".md"
-		}
-		_, err := os.Stat(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(filename))))
-		if err == nil {
-			return "", fmt.Errorf("new post file %q already exists", filename)
-		}
-		err = m.save(filename,
-			"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
-		if err != nil {
-			log.Printf("Unable to save post %q: %v", filename, err)
-			return "", err
-		}
-		log.Printf("Created new post %q", filename)
-		// TODO: idx update single article
-		idx.indexArticles()
-		return m.edit(filename)
+func (m post) new(file, user string) (string, error) {
+	file = path.Base(unescapeOrEmpty(file))
+	if !strings.HasSuffix(file, ".md") {
+		file = file + ".md"
 	}
+	_, err := os.Stat(path.Join(*rootDir, *postsDir, file))
+	if err == nil {
+		return "", fmt.Errorf("new post file %q already exists", file)
+	}
+	err = m.save(file,
+		"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
+	if err != nil {
+		log.Printf("Unable to save post %q: %v", file, err)
+		return "", err
+	}
+	log.Printf("Created new post %q", file)
+	// TODO: idx update single article
+	idx.indexArticles()
+	return m.edit(file)
+}
+
+func (m post) delete(file string) (string, error) {
+	file = path.Base(unescapeOrEmpty(file))
+	err := os.Remove(path.Join(*rootDir, *postsDir, file))
+	if err != nil {
+		log.Printf("Unable to delete post %q: %v", file, err)
+		return "", err
+	}
+	idx.deletePost(file)
+	log.Printf("Deleted post %q", file)
+	return m.list()
+}
+
+func (m post) rename(old, new string) (string, error) {
+	old = path.Base(unescapeOrEmpty(old))
+	new = path.Base(unescapeOrEmpty(new))
+	if !strings.HasSuffix(new, ".md") {
+		new = new + ".md"
+	}
+	err := os.Rename(
+		path.Join(*rootDir, *postsDir, old),
+		path.Join(*rootDir, *postsDir, new),
+	)
+	if err != nil {
+		log.Printf("Unable to rename post from %q to %q: %v", old, new, err)
+		return "", err
+	}
+	idx.renamePost(old, new)
+	log.Printf("Renamed post %v to %v", old, new)
 	return m.list()
 }
 
@@ -211,11 +221,10 @@ func (post) list() (string, error) {
 	}
 
 	buf.WriteString(`</TABLE>`)
-
 	return buf.String(), nil
 }
 
-func (post) save(fileName, postText string) error {
+func (m post) save(fileName, postText string) error {
 	if fileName == "" {
 		return nil
 	}
