@@ -1,3 +1,5 @@
+![logo](logo.png)
+
 # BloKi - A minimalistic Blog and Wiki Engine
 
 If you want a small, simple, easy to use, high performance, micro blog/wiki platform and you're tired of, or afraid to even touch WordPress, MediaWiki, LAMP, this might be for you.
