@@ -2,6 +2,7 @@
 
 ## Major Features
 
+- better modern template
 - search posts
 - user comments
   https://akismet.com/
