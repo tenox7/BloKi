@@ -37,7 +37,6 @@
 
 ## Admin
 
-- media list sort
 - sort by different columns name/author/published/modified
 - search posts
 - 2fa for admin login, probably

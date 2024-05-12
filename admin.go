@@ -334,6 +334,9 @@ func (media) list() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	sort.Slice(m, func(i, j int) bool {
+		return m[i].Name() < m[j].Name()
+	})
 	for x, i := range m {
 		if i.IsDir() || strings.HasPrefix(i.Name(), ".") ||
 			!(strings.HasSuffix(i.Name(), ".jpg") ||
