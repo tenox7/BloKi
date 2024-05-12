@@ -46,3 +46,4 @@
   https://www.twilio.com/docs/verify/quickstarts/totp
 - user manager
 - better error messages than text
+- fancy, 3rd party, javascript based markdown editor
