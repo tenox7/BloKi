@@ -1,0 +1,10 @@
+[Unit]
+Description=BloKi Engine
+
+[Service]
+ExecStart=%h/bin/bloki -addr :8080 -secrets %h/secrets.json -root_dir %h/site "BloKi Dev Blog"
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=default.target
