@@ -1,18 +1,18 @@
-# BloKi - A minimalistic Blog and Wiki Platform
+# BloKi - A minimalistic Blog and Wiki Engine
 
-If you want an ultra small, simple, easy to use, high performance, micro blog/wiki platform and you're tired of, or afraid to even touch WordPress, MediaWiki, LAMP, this might be for you.
+If you want a small, simple, easy to use, high performance, micro blog/wiki platform and you're tired of, or afraid to even touch WordPress, MediaWiki, LAMP, this might be for you.
 
 ## Main features
 
 - No PHP, Apache, Nginx, JavaScript and SQL.
 
-- The UI, resembles WordPress and MediaWiki, but without all the bloat. There are user editable themes based on simple .html/css template files. 
+- The web based Admin UI resembles WordPress and MediaWiki, but without all the bloat.
 
-- Different HTML templates for modern, legacy and vintage web browsers. BloKi supports modern, low end, legacy and text mode browsers.
-
-- Web based admin interface with built-in markdown editor. However, the articles and media are stored as regular files. Editable in any editor of your choice. Versioned by Git. In future it will support S3 buckets.
+- Articles and media are stored as regular files. Apart from web admin - editable in any editor of your choice! Versioned by Git.
 
 - The server software is a single file, statically linked, self contained binary. Runs on most modern OSes without any external dependencies, scripting runtimes, libraries, etc. Easily host your blog on a Raspberry PI, small VM, Docker container, Lambda or Cloud Run function.
+
+- BloKi supports modern, low end, legacy, vintage and even text mode browsers. User editable themes.
 
 
 ## Current status
