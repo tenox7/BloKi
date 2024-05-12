@@ -67,7 +67,7 @@ var (
 
 	templates    map[string]*template.Template
 	idx          postIndex
-	secretsStore *tkvs.KVS
+	secretsStore *tkvs.TKVS
 )
 
 type postIndex struct {
