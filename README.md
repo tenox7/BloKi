@@ -22,6 +22,13 @@ If you want a small, simple, easy to use, high performance, micro blog/wiki plat
 
 Development progress can be tracked on [dogfood blog](https://blog.tenox.net/)
 
+## Running BloKi
+
+Sample systemd configuration files are provided. Similar to any other web server, BloKi will require
+either a privileged account or set of capabilities to bind to port 80 and 443. When using the secrets
+file, it is recommended to start BloKi as root with `-chroot` and `-setuid` flags. This way BloKi can
+open the secrets store before entering chroot. However you can also chroot and setuid from systemd.
+
 ## Legal
 Copyright (c) 2024 by Antoni Sawicki
 Licensed under Apache-2.0 license
