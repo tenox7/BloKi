@@ -31,6 +31,20 @@ either a privileged account or set of capabilities to bind to port 80 and 443. W
 file, it is recommended to start BloKi as root with `-chroot` and `-setuid` flags. This way BloKi can
 open the secrets store before entering chroot. However you can also chroot and setuid from systemd.
 
+### Auto SSL/TLS Certs / ACME / Lets Encrypt
+
+BloKi supports automatic certificate generation using Lets Encrypt / ACME. The keys and certs are stored
+in the secrets file. Simply add following flags:
+
+```sh
+bloki \
+    -secrets /path/to/my/bloki.secrets \
+    -addr :443 \
+    -acm_addr :80 \
+    -acm_host blog.mysite.net \
+    ...
+```
+
 ### Web Admin
 
 BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in
@@ -38,7 +52,7 @@ for a first time, a user will need to be created from command line. You can use 
 list, delete and set passwords. The secrets flag is required.
 
 ```sh
-bloki -secrects /path/to/bloki.secrets  user passwd admin
+bloki -secrets /path/to/bloki.secrets  user passwd admin
 New Password:
 ```
 

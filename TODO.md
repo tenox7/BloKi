@@ -29,7 +29,6 @@
 
 ## Runtimes
 
-- service files, etc
 - docker container
 - cloud run, fargate
 - lambda, cloud functions
