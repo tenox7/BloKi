@@ -196,7 +196,6 @@ func (post) list() (string, error) {
 	for a := range idx.metaData {
 		srt = append(srt, a)
 	}
-	// TODO: also sort unpublished by mod time
 	sort.SliceStable(srt, func(i, j int) bool {
 		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) && idx.metaData[srt[j]].published.Equal(time.Unix(0, 0)) {
 			return idx.metaData[srt[j]].modified.Before(idx.metaData[srt[i]].modified)

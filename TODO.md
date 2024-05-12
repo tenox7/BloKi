@@ -38,7 +38,7 @@
 ## Admin
 
 - media list sort
-- also sort unpublished articles
+- sort by different columns name/author/published/modified
 - search posts
 - 2fa for admin login, probably
 - https:www.twilio.com/docs/verify/quickstarts/totp
