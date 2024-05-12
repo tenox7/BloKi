@@ -1,0 +1,29 @@
+[Unit]
+Description=BloKi Engine
+After=network.target
+
+[Service]
+User=root
+ExecStart=/usr/local/sbin/bloki \
+    -addr=:443 \
+    -acm_addr :80 \
+    -acm_host blog.mysite.net \
+    -secrets /usr/local/etc/bloki.secrets \
+    -root_dir /var/bloki/site \
+    -chroot \
+    -setuid myuser \
+    -site_name "My Blog" \
+    -subtitle "blog about cool shit"
+Restart=on-failure
+SuccessExitStatus=3 4
+RestartForceExitStatus=3 4
+RestartSec=60
+
+# Hardening
+PrivateTmp=true
+SystemCallArchitectures=native
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

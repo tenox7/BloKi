@@ -1,0 +1,26 @@
+[Unit]
+Description=BloKi Engine
+After=network.target
+
+[Service]
+User=myuser
+RootDirectory=/home/myuser/mysite
+ExecStart=/usr/local/sbin/bloki \
+    -addr=:8080 \
+    -root_dir / \
+    -site_name "My Blog" \
+    -subtitle "blog about cool shit"
+Restart=on-failure
+SuccessExitStatus=3 4
+RestartForceExitStatus=3 4
+RestartSec=60
+
+# Hardening
+ProtectSystem=full
+PrivateTmp=true
+SystemCallArchitectures=native
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
