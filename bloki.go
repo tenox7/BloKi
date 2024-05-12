@@ -386,6 +386,9 @@ func main() {
 
 	// manage users
 	if flag.Arg(0) == "user" {
+		if secretsStore == nil {
+			log.Fatal("The secrets file must be specified")
+		}
 		c := creds{}
 		c.manager()
 		return
