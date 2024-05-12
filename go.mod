@@ -1,4 +1,4 @@
-module github.com/tenox7/BloKi
+module github.com/tenox7/bloki
 
 go 1.21.5
 
