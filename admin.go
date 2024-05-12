@@ -446,7 +446,7 @@ func (c creds) manager() {
 			if !strings.HasPrefix(u, "user:") {
 				continue
 			}
-			fmt.Println(u)
+			fmt.Println(strings.Split(u, ":")[1])
 		}
 	default:
 		fmt.Println("usage: bloki user <passwd|delete|list> [username]")
