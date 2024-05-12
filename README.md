@@ -19,7 +19,7 @@ If you want a small, simple, easy to use, high performance, micro blog/wiki plat
 
 ## Current status
 
-- Basic blog engine and admin interface works.
+- Basic blog engine and admin UI works.
 - You can see working example [here](https://blog.tenox.net/)
 
 Development progress can be tracked on [dogfood blog](https://blog.tenox.net/)
@@ -49,14 +49,16 @@ bloki \
 
 ### Web Admin
 
-BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in
-for a first time, a user will need to be created from command line. You can use the `user` command to
-list, delete and set passwords. The secrets flag is required.
+BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. You probably should
+change it to something else. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete and set passwords. To create user, simply
+set the password. The secrets file is required.
 
 ```sh
-bloki -secrets /path/to/bloki.secrets  user passwd admin
-New Password:
+bloki -secrets /path/to/bloki.secrets  user  passwd  admin
+New Password: ...
 ```
+
+Currently there is no 2FA so please use a [strong password](https://xkcd.com/936/).
 
 ## Legal
 Copyright (c) 2024 by Antoni Sawicki

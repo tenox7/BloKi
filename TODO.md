@@ -41,6 +41,8 @@
 - sort by different columns name/author/published/modified
 - search posts
 - 2fa for admin login
-  https:www.twilio.com/docs/verify/quickstarts/totp
+  https://github.com/pquerna/otp
+  https://github.com/xlzd/gotp
+  https://www.twilio.com/docs/verify/quickstarts/totp
 - user manager
 - better error messages than text
