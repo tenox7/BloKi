@@ -198,6 +198,9 @@ func (post) list() (string, error) {
 	}
 	// TODO: also sort unpublished by mod time
 	sort.SliceStable(srt, func(i, j int) bool {
+		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) && idx.metaData[srt[j]].published.Equal(time.Unix(0, 0)) {
+			return idx.metaData[srt[j]].modified.Before(idx.metaData[srt[i]].modified)
+		}
 		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) {
 			return true
 		} else if idx.metaData[srt[j]].published.Equal(time.Unix(0, 0)) {
