@@ -24,10 +24,23 @@ Development progress can be tracked on [dogfood blog](https://blog.tenox.net/)
 
 ## Running BloKi
 
+### Service Files
+
 Sample systemd configuration files are provided. Similar to any other web server, BloKi will require
 either a privileged account or set of capabilities to bind to port 80 and 443. When using the secrets
 file, it is recommended to start BloKi as root with `-chroot` and `-setuid` flags. This way BloKi can
 open the secrets store before entering chroot. However you can also chroot and setuid from systemd.
+
+### Web Admin
+
+BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in
+for a first time, a user will need to be created from command line. You can use the `user` command to
+list, delete and set passwords. The secrets flag is required.
+
+```sh
+bloki -secrects /path/to/bloki.secrets  user passwd admin
+New Password:
+```
 
 ## Legal
 Copyright (c) 2024 by Antoni Sawicki
