@@ -17,7 +17,9 @@
 {{.Articles}}   
 {{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
                 </TD>
-                <TD WIDTH="20%" BGCOLOR="#FEFEFE" VALIGN="top">Tools</TD>
+                <TD WIDTH="20%" BGCOLOR="#FEFEFE" VALIGN="top">
+                    <A HREF="/">Home</A><BR>
+                </TD>
             </TR>
             <TR><TD COLSPAN="2">>Copyright &copy; by Authors of {{.SiteName}}. Best viewed in NCSA Mosaic! | BloKi Vintage Template</TD></TR>
         </TABLE>

@@ -15,8 +15,8 @@
         .header { color: #FFFFFF; background-color: #45A6DA; text-align: center; padding: 20px; }
         .header h1 { color: #FFFFFF; font-size: 40px; margin-bottom: 5px; }
         .main-content { display: flex; justify-content: space-between; margin-top: 20px; }
-        .articles { width: 65%; padding: 20px; }
-        .tools { width: 20%; background-color: #FAFAFA; padding: 20px; }
+        .articles { width: 65%; padding: 20px; z-index: 1; }
+        .tools { width: 20%; background-color: #FAFAFA; padding: 20px; z-index: 0; }
     </style>
 </head>
 <body>
@@ -27,12 +27,12 @@
     <div class="main-content">
         <div class="articles">
             <a href="/">Home</a>
-            {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
+            {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">| &larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
             {{.Articles}}   
             {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
         </div>
         <div class="tools">
-            tools
+            <a href="/">Home</a><br>
         </div>
     </div>
     <div style="text-align: center">
