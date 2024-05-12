@@ -182,12 +182,12 @@ func (post) list() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Posts</H1>
 		<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
-		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
+		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New Post" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
 		<INPUT TYPE="SUBMIT" NAME="edit" VALUE="Edit">
 		<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
 		<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');"><P>
 		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
-		<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Article</TH><TH>Author</TH><TH>&darr;Published</TH><TH>Modified</TH></TR>
+		<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Article</TH><TH>&nbsp;</TH><TH>Author</TH><TH>&darr;Published</TH><TH>Modified</TH></TR>
 	`)
 
 	idx.RLock()
@@ -217,6 +217,7 @@ func (post) list() (string, error) {
 		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
 			"<TD><INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + a + "\">&nbsp;" +
 			"<A HREF=\"/" + url.QueryEscape(strings.TrimSuffix(a, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(a) + "</A></TD>" +
+			"<TD><A HREF=\"" + *adminUri + "/?tab=posts&edit=this&filename=" + url.QueryEscape(a) + "\">[Edit]</A></TD>" +
 			"<TD>" + idx.metaData[a].author + "</TD>" +
 			"<TD>" + p + "</TD>" +
 			"<TD>" + idx.metaData[a].modified.Format(timeFormat) + "</TD></TR>\n")
