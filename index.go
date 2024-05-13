@@ -10,8 +10,17 @@ import (
 	"path"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 )
+
+type postIndex struct {
+	pubSorted []string
+	metaData  map[string]postMetadata
+	pageLast  int
+
+	sync.RWMutex
+}
 
 func (idx *postIndex) rescan() {
 	start := time.Now()

@@ -18,7 +18,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
 	"syscall"
 	"text/template"
 	"time"
@@ -67,14 +66,6 @@ var (
 	idx          postIndex
 	secretsStore *tkvs.TKVS
 )
-
-type postIndex struct {
-	pubSorted []string
-	metaData  map[string]postMetadata
-	pageLast  int
-
-	sync.RWMutex
-}
 
 type postMetadata struct {
 	author    string
