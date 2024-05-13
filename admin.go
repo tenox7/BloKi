@@ -96,10 +96,11 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (m post) new(file, user string) (string, error) {
+	file = unescapeOrEmpty(file)
 	if file == "" || file == "null" {
 		return m.list()
 	}
-	file = path.Base(unescapeOrEmpty(file))
+	file = path.Base(file)
 	if !strings.HasSuffix(file, ".md") {
 		file = file + ".md"
 	}
@@ -114,8 +115,7 @@ func (m post) new(file, user string) (string, error) {
 		return "", err
 	}
 	log.Printf("Created new post %q", file)
-	// TODO: idx update single article
-	idx.indexArticles()
+	idx.update(file)
 	return m.edit(file)
 }
 
@@ -129,7 +129,7 @@ func (m post) delete(file string) (string, error) {
 		log.Printf("Unable to delete post %q: %v", file, err)
 		return "", err
 	}
-	idx.deletePost(file)
+	idx.delete(file)
 	log.Printf("Deleted post %q", file)
 	return m.list()
 }
@@ -151,7 +151,7 @@ func (m post) rename(old, new string) (string, error) {
 		log.Printf("Unable to rename post from %q to %q: %v", old, new, err)
 		return "", err
 	}
-	idx.renamePost(old, new)
+	idx.rename(old, new)
 	log.Printf("Renamed post %v to %v", old, new)
 	return m.list()
 }
@@ -197,12 +197,12 @@ func (post) list() (string, error) {
 		srt = append(srt, a)
 	}
 	sort.SliceStable(srt, func(i, j int) bool {
-		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) && idx.metaData[srt[j]].published.Equal(time.Unix(0, 0)) {
+		if idx.metaData[srt[i]].published.IsZero() && idx.metaData[srt[j]].published.IsZero() {
 			return idx.metaData[srt[j]].modified.Before(idx.metaData[srt[i]].modified)
 		}
-		if idx.metaData[srt[i]].published.Equal(time.Unix(0, 0)) {
+		if idx.metaData[srt[i]].published.IsZero() {
 			return true
-		} else if idx.metaData[srt[j]].published.Equal(time.Unix(0, 0)) {
+		} else if idx.metaData[srt[j]].published.IsZero() {
 			return false
 		}
 		return idx.metaData[srt[j]].published.Before(idx.metaData[srt[i]].published)
@@ -211,7 +211,7 @@ func (post) list() (string, error) {
 	i := 0
 	for _, a := range srt {
 		p := idx.metaData[a].published.Format(timeFormat)
-		if idx.metaData[a].published.Equal(time.Unix(0, 0)) {
+		if idx.metaData[a].published.IsZero() {
 			p = "draft"
 		}
 		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
@@ -229,10 +229,11 @@ func (post) list() (string, error) {
 }
 
 func (m post) save(file, postText string) (string, error) {
+	file = unescapeOrEmpty(file)
 	if file == "" {
 		return m.list()
 	}
-	fullFilename := path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(file)))
+	fullFilename := path.Join(*rootDir, *postsDir, path.Base(file))
 	log.Printf("Saving %q", fullFilename)
 	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
 	if err != nil {
@@ -250,8 +251,7 @@ func (m post) save(file, postText string) (string, error) {
 		return "", errors.New("unable to rename temp file to the target file: " + err.Error())
 	}
 	log.Printf("Saved post %q", file)
-	// TODO: idx update single article
-	idx.indexArticles()
+	idx.update(file)
 	return m.list()
 }
 

@@ -126,7 +126,7 @@ func (t *TemplateData) renderArticle(name string) {
 	idx.RLock()
 	m := idx.metaData[path.Base(unescapeOrEmpty(name))]
 	idx.RUnlock()
-	if m.published.Equal(time.Unix(0, 0)) {
+	if m.published.IsZero() {
 		t.Articles = renderError(name, "not published") // TODO: better error handling
 		return
 	}
@@ -202,91 +202,111 @@ func handleRobots(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "User-agent: *\nAllow: /\n")
 }
 
-func (i *postIndex) indexArticles() {
+func (idx *postIndex) rescan() {
 	start := time.Now()
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
 		log.Fatal(err)
 	}
-	meta := make(map[string]postMetadata)
-	seq := []string{}
 	for _, f := range d {
-		// move this whole thing in to another function that can be called externally
-		// for example by admin save/rename/delete
-		if f.IsDir() || f.Name()[0:1] == "." || !strings.HasSuffix(f.Name(), ".md") {
-			continue
-		}
-		fi, err := f.Info()
-		if err != nil {
-			continue
-		}
-		a, err := os.ReadFile(path.Join(*rootDir, *postsDir, f.Name()))
-		if err != nil {
-			log.Printf("error reading %v: %v", f.Name(), err)
-			continue
-		}
-		author := authorRe.FindSubmatch(a)
-		if len(author) < 2 {
-			author = [][]byte{[]byte(""), []byte("unknown")}
-		}
-		m := publishedRe.FindSubmatch(a)
-		if len(m) < 1 {
-			m = [][]byte{[]byte(""), []byte("")}
-		}
-		t, err := time.Parse(timeFormat, string(m[1]))
-		if err != nil {
-			t = time.Unix(0, 0)
-		}
-		// TODO: add title from regexp
-		meta[f.Name()] = postMetadata{
-			modified:  fi.ModTime(),
-			published: t,
-			author:    string(author[1]),
-		}
-		if t.Equal(time.Unix(0, 0)) {
-			continue
-		}
-		seq = append(seq, f.Name())
+		idx.add(f.Name())
 	}
-	sort.Slice(seq, func(i, j int) bool {
-		return meta[seq[j]].published.Before(meta[seq[i]].published)
-	})
-	pgMax := int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
-	log.Printf("idx: indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(seq), seq, pgMax, time.Since(start))
-	i.Lock()
-	defer i.Unlock()
-	idx.metaData = meta
-	i.pubSorted = seq
-	i.pageLast = pgMax
+	idx.sequence()
+	idx.RLock()
+	defer idx.RUnlock()
+	log.Printf("idx: indexed %v articles, sequenced: %+v, last page is %v, duration %v", len(idx.pubSorted), idx.pubSorted, idx.pageLast, time.Since(start))
 }
 
-func (i *postIndex) renamePost(old, new string) {
-	i.Lock()
-	defer i.Unlock()
-	for n, p := range i.pubSorted {
+func (idx *postIndex) sequence() {
+	seq := []string{}
+	idx.Lock()
+	defer idx.Unlock()
+	for n := range idx.metaData {
+		seq = append(seq, n)
+	}
+	sort.Slice(seq, func(i, j int) bool {
+		return idx.metaData[seq[j]].published.Before(idx.metaData[seq[i]].published)
+	})
+	idx.pubSorted = seq
+	idx.pageLast = int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
+}
+
+func (idx *postIndex) add(name string) bool {
+	if name[0:1] == "." || !strings.HasSuffix(name, ".md") {
+		return false
+	}
+	fullName := path.Join(*rootDir, *postsDir, name)
+	fi, err := os.Stat(fullName)
+	if err != nil {
+		log.Printf("unable to stat %q: %v", fullName, err)
+		return false
+	}
+	if fi.IsDir() {
+		return false
+	}
+	a, err := os.ReadFile(fullName)
+	if err != nil {
+		log.Printf("error reading %v: %v", name, err)
+		return false
+	}
+	author := authorRe.FindSubmatch(a)
+	if len(author) < 2 {
+		author = [][]byte{[]byte(""), []byte("unknown")}
+	}
+	m := publishedRe.FindSubmatch(a)
+	if len(m) < 1 {
+		m = [][]byte{[]byte(""), []byte("")}
+	}
+	t, err := time.Parse(timeFormat, string(m[1]))
+	if err != nil {
+		t = time.Time{}
+	}
+	idx.Lock()
+	defer idx.Unlock()
+	// TODO: add title from regexp
+	idx.metaData[name] = postMetadata{
+		modified:  fi.ModTime(),
+		published: t,
+		author:    string(author[1]),
+	}
+	log.Printf("idx: added %q", name)
+	// addPost() requires sequencing by calling pi.sequence, rename and delete do not
+	return true
+}
+
+func (idx *postIndex) update(name string) {
+	idx.delete(name)
+	idx.add(name)
+	idx.sequence()
+}
+
+func (idx *postIndex) rename(old, new string) {
+	idx.Lock()
+	defer idx.Unlock()
+	for n, p := range idx.pubSorted {
 		if p != old {
 			continue
 		}
-		i.pubSorted[n] = new
+		idx.pubSorted[n] = new
 	}
-	i.metaData[new] = i.metaData[old]
-	delete(i.metaData, old)
-	log.Printf("idx: rename %q to %q, new index: %+v", old, new, i.pubSorted)
+	idx.metaData[new] = idx.metaData[old]
+	delete(idx.metaData, old)
+	log.Printf("idx: rename %q to %q, new index: %+v", old, new, idx.pubSorted)
 }
 
-func (i *postIndex) deletePost(name string) {
-	i.Lock()
-	defer i.Unlock()
+func (pi *postIndex) delete(name string) {
+	pi.Lock()
+	defer pi.Unlock()
 	seq := []string{}
-	for _, s := range i.pubSorted {
+	for _, s := range pi.pubSorted {
 		if s == name {
 			continue
 		}
 		seq = append(seq, s)
 	}
-	i.pubSorted = seq
-	delete(i.metaData, name)
-	log.Printf("idx: deleted post %v, new index: %+v", name, i.pubSorted)
+	pi.pubSorted = seq
+	delete(pi.metaData, name)
+	log.Printf("idx: deleted post %v, new index: %+v", name, pi.pubSorted)
 }
 
 func vintage(ua string) string {
@@ -483,7 +503,8 @@ func main() {
 	}
 
 	// index articles
-	idx.indexArticles()
+	idx.metaData = make(map[string]postMetadata)
+	idx.rescan()
 
 	// favicon
 	fst, err := os.Stat(path.Join(*rootDir, "favicon.ico"))

@@ -3,6 +3,7 @@
 ## Major Features
 
 - better modern template
+- constant make width - 1000px in WP?
 - search posts
 - user comments
   https://akismet.com/
@@ -13,8 +14,6 @@
 
 ## Core Engine
 
-- index update for a single file + re-run sequence
-- make admin save/rename/delete also use that
 - git integration
 - better error handling, use string builder
 - render node hook for /media/
@@ -24,7 +23,6 @@
 - render to static site
 - throttle qps
 - statistics module, page views, latencies, etc
-- constant make width - 1000px in WP?
 - reindex on inotify (incl rename/move)
 - rendered html article cache
 - reindex on signal
