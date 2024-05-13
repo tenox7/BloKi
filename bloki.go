@@ -268,13 +268,13 @@ func main() {
 		switch err {
 		case nil:
 			templates[t] = tpl
-			log.Printf("Loaded template %q from disk", t)
+			log.Printf("Loaded local template %q from disk", t)
 		default:
 			templates[t], err = template.ParseFS(templateFS, *htmplDir+t+".html")
 			if err != nil {
 				log.Fatalf("error parsing embedded template %q: %v", t, err)
 			}
-			log.Printf("Loaded template %q from embed.FS", t)
+			log.Printf("Loaded embedded template %q", t)
 		}
 	}
 
