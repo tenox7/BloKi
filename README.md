@@ -21,9 +21,7 @@ If you want a small, simple, easy to use, high performance, micro blog/wiki plat
 ## Current status
 
 - Basic blog engine and admin UI works.
-- You can see working example [here](https://blog.tenox.net/)
-
-Development progress can be tracked on [dogfood blog](https://blog.tenox.net/)
+- You can see a working example on [dogfood blog](https://blog.tenox.net/)
 
 ## Running BloKi
 
@@ -60,6 +58,11 @@ New Password: ...
 ```
 
 Currently there is no 2FA so please use a [strong password](https://xkcd.com/936/).
+
+### Customizing look and feel (templates)
+
+By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel create a folder `site/templates`, download the
+default teamplate(s) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
 
 ## Legal
 Copyright (c) 2024 by Antoni Sawicki
