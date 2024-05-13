@@ -67,13 +67,6 @@ var (
 	secretsStore *tkvs.TKVS
 )
 
-type postMetadata struct {
-	author    string
-	published time.Time
-	modified  time.Time
-	tile      string
-}
-
 type TemplateData struct {
 	SiteName  string
 	SubTitle  string

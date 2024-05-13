@@ -22,6 +22,13 @@ type postIndex struct {
 	sync.RWMutex
 }
 
+type postMetadata struct {
+	author    string
+	published time.Time
+	modified  time.Time
+	tile      string
+}
+
 func (idx *postIndex) rescan() {
 	start := time.Now()
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
