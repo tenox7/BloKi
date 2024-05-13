@@ -16,6 +16,7 @@ If you want a small, simple, easy to use, high performance, micro blog/wiki plat
 
 - BloKi supports modern, low end, legacy, vintage and even text mode browsers. User editable themes.
 
+![admin ui](admin.png)
 
 ## Current status
 
