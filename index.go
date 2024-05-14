@@ -79,7 +79,6 @@ func (idx *postIndex) sequence() {
 		}
 		idx.latestPosts += fmt.Sprintf("<li><a href=\"/%v\">%v</a><br>\n", url.QueryEscape(idx.metaData[s].url), html.EscapeString(idx.metaData[s].title))
 	}
-	log.Println(idx.latestPosts)
 }
 
 func (idx *postIndex) add(name string) bool {
