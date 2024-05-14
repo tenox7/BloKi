@@ -216,7 +216,7 @@ func (post) list() (string, error) {
 		}
 		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
 			"<TD><INPUT TYPE=\"radio\" NAME=\"filename\" VALUE=\"" + a + "\">&nbsp;" +
-			"<A HREF=\"/" + url.QueryEscape(strings.TrimSuffix(a, ".md")) + "\" TARGET=\"_blank\">" + html.EscapeString(a) + "</A></TD>" +
+			"<A HREF=\"/" + url.QueryEscape(idx.metaData[a].url) + "\" TARGET=\"_blank\">" + html.EscapeString(a) + "</A></TD>" +
 			"<TD><A HREF=\"" + *adminUri + "/?tab=posts&edit=this&filename=" + url.QueryEscape(a) + "\">[Edit]</A></TD>" +
 			"<TD>" + idx.metaData[a].author + "</TD>" +
 			"<TD>" + p + "</TD>" +
