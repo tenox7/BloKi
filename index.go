@@ -33,7 +33,8 @@ type postMetadata struct {
 	author    string
 	published time.Time
 	modified  time.Time
-	tile      string
+	title     string
+	url       string
 }
 
 func (idx *postIndex) rescan() {
@@ -91,6 +92,10 @@ func (idx *postIndex) add(name string) bool {
 	if len(m) < 1 {
 		m = [][]byte{[]byte(""), []byte("")}
 	}
+	title := titleRe.FindSubmatch(a)
+	if len(title) < 2 {
+		title = [][]byte{[]byte(""), []byte(strings.TrimSuffix(name, ".md"))}
+	}
 	t, err := time.Parse(timeFormat, string(m[1]))
 	if err != nil {
 		t = time.Time{}
@@ -102,8 +107,9 @@ func (idx *postIndex) add(name string) bool {
 		modified:  fi.ModTime(),
 		published: t,
 		author:    string(author[1]),
+		title:     strings.TrimSuffix(string(title[1]), "\r"),
 	}
-	log.Printf("idx: added %q", name)
+	log.Printf("idx: added %q (%v)", name, idx.metaData[name].title)
 	// addPost() requires sequencing by calling pi.sequence, rename and delete do not
 	return true
 }
