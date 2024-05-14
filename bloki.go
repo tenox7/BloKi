@@ -15,7 +15,6 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -44,10 +43,7 @@ var (
 )
 
 var (
-	timeFormat  = "2006-01-02 15:04"
-	publishedRe = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
-	authorRe    = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
-	charset     = map[bool]string{
+	charset = map[bool]string{
 		true:  "UTF-8",
 		false: "ISO-8859-1",
 	}

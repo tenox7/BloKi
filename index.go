@@ -8,10 +8,17 @@ import (
 	"math"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
 	"time"
+)
+
+var (
+	timeFormat  = "2006-01-02 15:04"
+	publishedRe = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
+	authorRe    = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
 )
 
 type postIndex struct {
