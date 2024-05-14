@@ -224,7 +224,7 @@ func (post) list() (string, error) {
 		i++
 	}
 
-	buf.WriteString(`</TABLE>`)
+	buf.WriteString("</TABLE>\n")
 	return buf.String(), nil
 }
 
