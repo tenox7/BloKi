@@ -4,8 +4,11 @@
 package main
 
 import (
+	"fmt"
+	"html"
 	"log"
 	"math"
+	"net/url"
 	"os"
 	"path"
 	"regexp"
@@ -19,12 +22,14 @@ var (
 	timeFormat  = "2006-01-02 15:04"
 	publishedRe = regexp.MustCompile(`\[//\]: # \(published=(.+)\)`)
 	authorRe    = regexp.MustCompile(`\[//\]: # \(author=(.+)\)`)
+	titleRe     = regexp.MustCompile(`(?m)^#\s+(.+)`)
 )
 
 type postIndex struct {
-	pubSorted []string
-	metaData  map[string]postMetadata
-	pageLast  int
+	pubSorted   []string
+	metaData    map[string]postMetadata
+	pageLast    int
+	latestPosts string
 
 	sync.RWMutex
 }
@@ -64,6 +69,17 @@ func (idx *postIndex) sequence() {
 	})
 	idx.pubSorted = seq
 	idx.pageLast = int(math.Ceil(float64(len(seq))/float64(*artPerPg)) - 1)
+	idx.latestPosts = ""
+	for i, s := range seq {
+		if i >= *ltsPosts {
+			break
+		}
+		if idx.metaData[s].published.IsZero() {
+			continue
+		}
+		idx.latestPosts += fmt.Sprintf("<li><a href=\"/%v\">%v</a><br>\n", url.QueryEscape(idx.metaData[s].url), html.EscapeString(idx.metaData[s].title))
+	}
+	log.Println(idx.latestPosts)
 }
 
 func (idx *postIndex) add(name string) bool {
@@ -108,6 +124,7 @@ func (idx *postIndex) add(name string) bool {
 		published: t,
 		author:    string(author[1]),
 		title:     strings.TrimSuffix(string(title[1]), "\r"),
+		url:       strings.TrimSuffix(name, ".md"),
 	}
 	log.Printf("idx: added %q (%v)", name, idx.metaData[name].title)
 	// addPost() requires sequencing by calling pi.sequence, rename and delete do not

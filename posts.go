@@ -15,15 +15,16 @@ import (
 )
 
 type TemplateData struct {
-	SiteName  string
-	SubTitle  string
-	Articles  string
-	CharSet   string
-	Paginator string
-	Page      int
-	PgNewer   int
-	PgOlder   int
-	PgOldest  int
+	SiteName    string
+	SubTitle    string
+	Articles    string
+	CharSet     string
+	Paginator   string
+	Page        int
+	PgNewer     int
+	PgOlder     int
+	PgOldest    int
+	LatestPosts string
 }
 
 func renderMd(md []byte, name, published string) string {
@@ -88,9 +89,10 @@ func handlePosts(w http.ResponseWriter, r *http.Request) {
 	fi := path.Base(r.URL.Path)
 
 	td := TemplateData{
-		SiteName: *siteName,
-		SubTitle: *subTitle,
-		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
+		SiteName:    *siteName,
+		SubTitle:    *subTitle,
+		CharSet:     charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
+		LatestPosts: func() string { idx.RLock(); defer idx.RUnlock(); return idx.latestPosts }(),
 	}
 
 	switch {
