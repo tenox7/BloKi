@@ -1,6 +1,5 @@
-// index handling routines
 // index is used to keep in memory copy of post metadata
-// mainly used for sorting (sequencing) so that blog posts are displayed in order
+// mainly used for sorting so that blog posts are displayed in order
 package main
 
 import (
@@ -44,6 +43,9 @@ type postMetadata struct {
 
 func (idx *postIndex) rescan() {
 	start := time.Now()
+	idx.Lock()
+	idx.metaData = make(map[string]postMetadata)
+	idx.Unlock()
 	d, err := os.ReadDir(path.Join(*rootDir, *postsDir))
 	if err != nil {
 		log.Fatal(err)

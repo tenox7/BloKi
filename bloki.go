@@ -276,7 +276,6 @@ func main() {
 	}
 
 	// index articles
-	idx.metaData = make(map[string]postMetadata)
 	idx.rescan()
 
 	// favicon
