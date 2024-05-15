@@ -57,6 +57,7 @@ var (
 
 	templates    map[string]*template.Template
 	idx          postIndex
+	txt          textSearch
 	secretsStore *tkvs.TKVS
 )
 
@@ -277,6 +278,9 @@ func main() {
 
 	// index articles
 	idx.rescan()
+
+	// start text search
+	txt.rescan()
 
 	// favicon
 	fst, err := os.Stat(path.Join(*rootDir, "favicon.ico"))
