@@ -57,11 +57,14 @@ func (t *TemplateData) renderArticle(name string, len int) {
 	m := idx.metaData[path.Base(unescapeOrEmpty(name))]
 	idx.RUnlock()
 	if m.published.IsZero() {
-		t.Articles = renderError(name, "is not published") // TODO: better error handling
+		// TODO: searchPosts() may find unpublished articles, they would display an error
+		// we also don't want to leak data on a random hit, so say nothing
+		//t.Articles = renderError(name, "is not published") // TODO: better error handling
 		return
 	}
 	postMd, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(name))))
 	if err != nil {
+		log.Printf("unable to read post %q: %v", name, err)
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
 	}
