@@ -67,7 +67,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		default:
 			adm.AdminTab, err = m.list()
 		}
-	default:
+	case "posts":
 		m := post{}
 		adm.ActiveTab = "posts"
 		switch {
@@ -86,6 +86,8 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		default:
 			adm.AdminTab, err = m.list("")
 		}
+	default:
+		adm.AdminTab = "<H1>Not Implemented</H1><P>"
 	}
 	if err != nil {
 		log.Print(err)

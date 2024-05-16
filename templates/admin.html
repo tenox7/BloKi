@@ -41,6 +41,8 @@
         <DIV CLASS="sidebar">
             <DIV CLASS="{{if eq .ActiveTab "posts"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=posts">Posts</A></DIV>
             <DIV CLASS="{{if eq .ActiveTab "media"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=media">Media</A></DIV>
+            <DIV CLASS="{{if eq .ActiveTab "tags"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=tags">Tags</A></DIV>
+            <DIV CLASS="{{if eq .ActiveTab "comments"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=comments">Comments</A></DIV>
             <DIV CLASS="{{if eq .ActiveTab "users"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=users">Users</A></DIV>
             <DIV CLASS="{{if eq .ActiveTab "stats"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=stats">Stats</A></DIV>
         </DIV>
