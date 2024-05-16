@@ -175,7 +175,8 @@ func (m post) edit(file string) (string, error) {
 		"<TEXTAREA NAME=\"textdata\" SPELLCHECK=\"true\" COLS=\"80\" ROWS=\"24\" WRAP=\"soft\" STYLE=\"width: 99%; height: 99%;\">\n" +
 		data + "</TEXTAREA><P>\n" +
 		"<INPUT TYPE=\"SUBMIT\" NAME=\"save\" VALUE=\"Save\"> <INPUT TYPE=\"SUBMIT\" NAME=\"cancel\" VALUE=\"Cancel\"><P>\n" +
-		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + html.EscapeString(file) + "\">\n",
+		"<INPUT TYPE=\"HIDDEN\" NAME=\"filename\" VALUE=\"" + html.EscapeString(file) + "\">\n" +
+		"<INPUT TYPE=\"HIDDEN\" NAME=\"tab\" VALUE=\"posts\">\n",
 	)
 	return buf.String(), nil
 }
