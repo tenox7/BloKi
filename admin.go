@@ -187,7 +187,7 @@ func (post) list(query string) (string, error) {
 	buf.WriteString(`<H1>Posts</H1>
 		<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
 		<INPUT TYPE="TEXT" NAME="query">
-		<INPUT TYPE="SUBMIT" NAME="seach" VALUE="Search">
+		<INPUT TYPE="SUBMIT" NAME="search" VALUE="Search">
 		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New Post" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
 		<INPUT TYPE="SUBMIT" NAME="edit" VALUE="Edit">
 		<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
