@@ -6,11 +6,13 @@
 - constant make width - 1000px in WP?
 - search posts
 - user comments
-  https://akismet.com/
+  - accounts: ???
+  - spam: https://akismet.com/
 - startup wizard
 - wiki mode
 - user admin
 - stats
+- tags
 
 ## Core Engine
 
@@ -36,8 +38,6 @@
 
 ## Admin
 
-- sort by different columns name/author/published/modified
-- search posts
 - 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
@@ -45,3 +45,4 @@
 - user manager
 - better error messages than text
 - fancy, 3rd party, javascript based markdown editor
+- sort by different columns name/author/published/modified
