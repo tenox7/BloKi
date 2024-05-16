@@ -84,9 +84,22 @@ func (t *TemplateData) paginatePosts(pg int) {
 	}
 }
 
+func (t *TemplateData) searchPosts(query string) {
+	res := txt.search(query)
+	if len(res) == 0 {
+		t.Articles = "<H1>Nothing found</H1>No posts matched the search criteria."
+		return
+	}
+	for i := range res {
+		t.renderArticle(res[i])
+	}
+}
+
 func handlePosts(w http.ResponseWriter, r *http.Request) {
 	log.Printf("view from=%q uri=%q url=%q, ua=%q", r.RemoteAddr, r.RequestURI, r.URL.Path, r.UserAgent())
-	fi := path.Base(r.URL.Path)
+	r.ParseForm()
+	post := path.Base(r.URL.Path)
+	query := unescapeOrEmpty(r.FormValue("query"))
 
 	td := TemplateData{
 		SiteName:    *siteName,
@@ -96,10 +109,11 @@ func handlePosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch {
-	case len(fi) > 1:
-		td.renderArticle(fi + ".md")
+	case len(post) > 1:
+		td.renderArticle(post + ".md")
+	case query != "":
+		td.searchPosts(query)
 	default:
-		r.ParseForm()
 		td.paginatePosts(atoiOrZero(r.FormValue("pg")))
 	}
 
