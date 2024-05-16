@@ -4,6 +4,7 @@
 
 - better modern template
   - constant make width - 1000px in WP?
+  - templates to display link to bk-admin if enabled by flag
 - user comments
   - accounts: ???
   - spam: https://akismet.com/
@@ -13,11 +14,11 @@
 
 ## Core Engine
 
-- git integration
-- better error handling, use string builder
 - render node hook for /media/
 - wiki style links to post/media/etc
 - continue reading block element inside a post like in WP
+- git integration
+- better error handling, use string builder
 - s3 support
 - render to static site
 - render cache
