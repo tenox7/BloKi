@@ -38,7 +38,8 @@
                 </TD>
                 <TD WIDTH="20%" VALIGN="top" BGCOLOR="#FEFEFE">
                     <A HREF="/">Home</A><BR>
-                        <p>Latest posts:</p>
+                        <P><FORM ACTION="/"><INPUT TYPE="text" METHOD="POST" NAME="query" SIZE="15"> <INPUT TYPE="submit" VALUE="Search"></FORM></P>
+                        <P>Latest posts:</P>
                         {{.LatestPosts}}
                 </TD>
             </TR>
