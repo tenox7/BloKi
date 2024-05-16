@@ -52,7 +52,7 @@ func renderError(name, errStr string) string {
 	return string("Article " + name + " " + errStr + "<p>\n\n")
 }
 
-func (t *TemplateData) renderArticle(name string) {
+func (t *TemplateData) renderArticle(name string, len int) {
 	idx.RLock()
 	m := idx.metaData[path.Base(unescapeOrEmpty(name))]
 	idx.RUnlock()
@@ -64,6 +64,11 @@ func (t *TemplateData) renderArticle(name string) {
 	if err != nil {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
+	}
+	// TODO: this is actually so lame, post can get chopped in middle of a tag
+	if len > 0 {
+		postMd = postMd[:len]
+		postMd = append(postMd, []byte("... <BR>Continue Reading... ")...)
 	}
 	postMd = append(postMd, []byte("\n\n---\n\n")...)
 	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
@@ -80,7 +85,7 @@ func (t *TemplateData) paginatePosts(pg int) {
 	t.PgNewer = pg - 1
 	t.PgOldest = pgl
 	for i := t.Page * (*artPerPg); i < (t.Page+1)*(*artPerPg) && i < len(seq); i++ {
-		t.renderArticle(seq[i])
+		t.renderArticle(seq[i], 0)
 	}
 }
 
@@ -91,7 +96,7 @@ func (t *TemplateData) searchPosts(query string) {
 		return
 	}
 	for i := range res {
-		t.renderArticle(res[i])
+		t.renderArticle(res[i], 200)
 	}
 }
 
@@ -110,7 +115,7 @@ func handlePosts(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case len(post) > 1:
-		td.renderArticle(post + ".md")
+		td.renderArticle(post+".md", 0)
 	case query != "":
 		td.searchPosts(query)
 	default:
