@@ -54,19 +54,6 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.FormValue("tab") {
-	case "media":
-		m := media{}
-		adm.ActiveTab = "media"
-		switch {
-		case r.FormValue("rename") != "":
-			adm.AdminTab, err = m.rename(r.FormValue("filename"), r.FormValue("rename"))
-		case r.FormValue("delete") == "true":
-			adm.AdminTab, err = m.delete(r.FormValue("filename"))
-		case r.FormValue("upload") != "":
-			adm.AdminTab, err = m.upload(r)
-		default:
-			adm.AdminTab, err = m.list()
-		}
 	case "posts":
 		m := post{}
 		adm.ActiveTab = "posts"
@@ -85,6 +72,19 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 			adm.AdminTab, err = m.list(r.FormValue("query"))
 		default:
 			adm.AdminTab, err = m.list("")
+		}
+	case "media":
+		m := media{}
+		adm.ActiveTab = "media"
+		switch {
+		case r.FormValue("rename") != "":
+			adm.AdminTab, err = m.rename(r.FormValue("filename"), r.FormValue("rename"))
+		case r.FormValue("delete") == "true":
+			adm.AdminTab, err = m.delete(r.FormValue("filename"))
+		case r.FormValue("upload") != "":
+			adm.AdminTab, err = m.upload(r)
+		default:
+			adm.AdminTab, err = m.list()
 		}
 	default:
 		adm.AdminTab = "<H1>Not Implemented</H1><P>"
