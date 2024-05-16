@@ -54,7 +54,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.FormValue("tab") {
-	case "posts":
+	case "posts", "":
 		m := post{}
 		adm.ActiveTab = "posts"
 		switch {
