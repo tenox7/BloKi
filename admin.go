@@ -82,8 +82,9 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		case r.FormValue("save") != "":
 			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
 		case r.FormValue("search") != "":
-		default:
 			adm.AdminTab, err = m.list(r.FormValue("query"))
+		default:
+			adm.AdminTab, err = m.list("")
 		}
 	}
 	if err != nil {
