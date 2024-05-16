@@ -60,14 +60,14 @@ func (t *TemplateData) renderArticle(name string) {
 		t.Articles = renderError(name, "is not published") // TODO: better error handling
 		return
 	}
-	article, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(name))))
+	postMd, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(name))))
 	if err != nil {
 		t.Articles = renderError(name, "not found") // TODO: better error handling
 		return
 	}
-	article = append(article, []byte("\n\n---\n\n")...)
+	postMd = append(postMd, []byte("\n\n---\n\n")...)
 	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
-	t.Articles += renderMd(article, strings.TrimSuffix(name, ".md"), p)
+	t.Articles += renderMd(postMd, strings.TrimSuffix(name, ".md"), p)
 }
 
 func (t *TemplateData) paginatePosts(pg int) {
