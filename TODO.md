@@ -3,15 +3,12 @@
 ## Major Features
 
 - better modern template
-- constant make width - 1000px in WP?
-- search posts
+  - constant make width - 1000px in WP?
 - user comments
   - accounts: ???
   - spam: https://akismet.com/
 - startup wizard
 - wiki mode
-- user admin
-- stats
 - tags
 
 ## Core Engine
@@ -23,10 +20,10 @@
 - continue reading block element inside a post like in WP
 - s3 support
 - render to static site
+- render cache
 - throttle qps
 - statistics module, page views, latencies, etc
 - reindex on inotify (incl rename/move)
-- rendered html article cache
 - reindex on signal
 
 ## Runtimes
@@ -44,6 +41,7 @@
   https://www.twilio.com/docs/verify/quickstarts/totp
 - user manager
 - better error messages than text
+- stats
 - fancy, 3rd party, javascript based markdown editor
 - sort by different columns name/author/published/modified
 - preview mode, render unpublished article with authentication
