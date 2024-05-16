@@ -81,8 +81,9 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 			adm.AdminTab, err = m.new(r.FormValue("newpost"), user)
 		case r.FormValue("save") != "":
 			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
+		case r.FormValue("search") != "":
 		default:
-			adm.AdminTab, err = m.list()
+			adm.AdminTab, err = m.list(r.FormValue("query"))
 		}
 	}
 	if err != nil {
@@ -98,7 +99,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 func (m post) new(file, user string) (string, error) {
 	file = unescapeOrEmpty(file)
 	if file == "" || file == "null" {
-		return m.list()
+		return m.list("")
 	}
 	file = path.Base(file)
 	if !strings.HasSuffix(file, ".md") {
@@ -121,7 +122,7 @@ func (m post) new(file, user string) (string, error) {
 
 func (m post) delete(file string) (string, error) {
 	if file == "" {
-		return m.list()
+		return m.list("")
 	}
 	file = path.Base(unescapeOrEmpty(file))
 	err := os.Remove(path.Join(*rootDir, *postsDir, file))
@@ -131,12 +132,12 @@ func (m post) delete(file string) (string, error) {
 	}
 	idx.delete(file)
 	log.Printf("Deleted post %q", file)
-	return m.list()
+	return m.list("")
 }
 
 func (m post) rename(old, new string) (string, error) {
 	if old == "" || new == "" {
-		return m.list()
+		return m.list("")
 	}
 	old = path.Base(unescapeOrEmpty(old))
 	new = path.Base(unescapeOrEmpty(new))
@@ -153,13 +154,13 @@ func (m post) rename(old, new string) (string, error) {
 	}
 	idx.rename(old, new)
 	log.Printf("Renamed post %v to %v", old, new)
-	return m.list()
+	return m.list("")
 }
 
 // perhaps we should have update in place, save and reopen
 func (m post) edit(file string) (string, error) {
 	if file == "" {
-		return m.list()
+		return m.list("")
 	}
 	data, err := m.load(file)
 	if err != nil {
@@ -178,38 +179,48 @@ func (m post) edit(file string) (string, error) {
 
 // TODO: I think that edit should be default action on a post and view could be in a secondary column in the table?
 // or better no view rather preview from inside the post
-func (post) list() (string, error) {
+func (post) list(query string) (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Posts</H1>
 		<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
+		<INPUT TYPE="TEXT" NAME="query">
+		<INPUT TYPE="SUBMIT" NAME="seach" VALUE="Search">
 		<INPUT TYPE="SUBMIT" NAME="newpost" VALUE="New Post" ONCLICK="this.value=prompt('Name the new post:', 'new-post.md');">
 		<INPUT TYPE="SUBMIT" NAME="edit" VALUE="Edit">
 		<INPUT TYPE="SUBMIT" NAME="rename" VALUE="Rename" ONCLICK="this.value=prompt('Enter new name:', '');">
-		<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');"><P>
+		<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this post?');">
+		<P>
 		<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
 		<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Article</TH><TH>&nbsp;</TH><TH>Author</TH><TH>&darr;Published</TH><TH>Modified</TH></TR>
 	`)
 
+	posts := []string{}
+	if query != "" {
+		posts = txt.search(query)
+	}
+
 	idx.RLock()
 	defer idx.RUnlock()
-	srt := []string{}
-	for a := range idx.metaData {
-		srt = append(srt, a)
+
+	if len(posts) == 0 && query == "" {
+		for a := range idx.metaData {
+			posts = append(posts, a)
+		}
+		sort.SliceStable(posts, func(i, j int) bool {
+			if idx.metaData[posts[i]].published.IsZero() && idx.metaData[posts[j]].published.IsZero() {
+				return idx.metaData[posts[j]].modified.Before(idx.metaData[posts[i]].modified)
+			}
+			if idx.metaData[posts[i]].published.IsZero() {
+				return true
+			} else if idx.metaData[posts[j]].published.IsZero() {
+				return false
+			}
+			return idx.metaData[posts[j]].published.Before(idx.metaData[posts[i]].published)
+		})
 	}
-	sort.SliceStable(srt, func(i, j int) bool {
-		if idx.metaData[srt[i]].published.IsZero() && idx.metaData[srt[j]].published.IsZero() {
-			return idx.metaData[srt[j]].modified.Before(idx.metaData[srt[i]].modified)
-		}
-		if idx.metaData[srt[i]].published.IsZero() {
-			return true
-		} else if idx.metaData[srt[j]].published.IsZero() {
-			return false
-		}
-		return idx.metaData[srt[j]].published.Before(idx.metaData[srt[i]].published)
-	})
 
 	i := 0
-	for _, a := range srt {
+	for _, a := range posts {
 		p := idx.metaData[a].published.Format(timeFormat)
 		if idx.metaData[a].published.IsZero() {
 			p = "draft"
@@ -231,7 +242,7 @@ func (post) list() (string, error) {
 func (m post) save(file, postText string) (string, error) {
 	file = unescapeOrEmpty(file)
 	if file == "" {
-		return m.list()
+		return m.list("")
 	}
 	fullFilename := path.Join(*rootDir, *postsDir, path.Base(file))
 	log.Printf("Saving %q", fullFilename)
@@ -252,7 +263,7 @@ func (m post) save(file, postText string) (string, error) {
 	}
 	log.Printf("Saved post %q", file)
 	idx.update(file)
-	return m.list()
+	return m.list("")
 }
 
 func (post) load(file string) (string, error) {
