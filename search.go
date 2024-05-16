@@ -50,14 +50,14 @@ func (t *textSearch) add(file string) {
 	}
 	t.Lock()
 	defer t.Unlock()
-	t.index.Index(strings.TrimRight(file, ".md"), string(b))
+	t.index.Index(file, string(b))
 	log.Printf("txt: indexed %q", file)
 }
 
 func (t *textSearch) delete(file string) {
 	t.Lock()
 	defer t.Unlock()
-	t.index.Delete(strings.TrimRight(path.Base(unescapeOrEmpty(file)), ".md"))
+	t.index.Delete(path.Base(unescapeOrEmpty(file)))
 }
 
 func (t *textSearch) rename(old, new string) {
