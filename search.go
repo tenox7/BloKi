@@ -71,7 +71,7 @@ func (t *textSearch) search(query string) []string {
 	}
 	t.Lock()
 	defer t.Unlock()
-	res, err := t.index.Search(bleve.NewSearchRequest(bleve.NewMatchQuery(query)))
+	res, err := t.index.Search(bleve.NewSearchRequest(bleve.NewFuzzyQuery(query)))
 	if err != nil {
 		return nil
 	}
