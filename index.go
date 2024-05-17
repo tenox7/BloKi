@@ -51,7 +51,7 @@ func (idx *postIndex) rescan() {
 		log.Fatal(err)
 	}
 	for _, f := range d {
-		idx.add(f.Name())
+		idx.addOnly(f.Name())
 	}
 	idx.sequence()
 	idx.RLock()
@@ -83,7 +83,7 @@ func (idx *postIndex) sequence() {
 	}
 }
 
-func (idx *postIndex) add(name string) bool {
+func (idx *postIndex) addOnly(name string) bool {
 	if name[0:1] == "." || !strings.HasSuffix(name, ".md") {
 		return false
 	}
@@ -128,14 +128,17 @@ func (idx *postIndex) add(name string) bool {
 		url:       strings.TrimSuffix(name, ".md"),
 	}
 	log.Printf("idx: added %q (%v)", name, idx.metaData[name].title)
-	// addPost() requires sequencing by calling pi.sequence, rename and delete do not
 	return true
+}
+
+func (idx *postIndex) add(name string) {
+	idx.addOnly(name)
+	idx.sequence()
 }
 
 func (idx *postIndex) update(name string) {
 	idx.delete(name)
 	idx.add(name)
-	idx.sequence()
 }
 
 func (idx *postIndex) rename(old, new string) {

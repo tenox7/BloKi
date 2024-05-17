@@ -119,7 +119,6 @@ func (m post) new(file, user string) (string, error) {
 		return "", err
 	}
 	log.Printf("Created new post %q", file)
-	idx.update(file)
 	return m.edit(file)
 }
 
@@ -134,6 +133,7 @@ func (m post) delete(file string) (string, error) {
 		return "", err
 	}
 	idx.delete(file)
+	txt.delete(file)
 	log.Printf("Deleted post %q", file)
 	return m.list("")
 }
@@ -156,6 +156,7 @@ func (m post) rename(old, new string) (string, error) {
 		return "", err
 	}
 	idx.rename(old, new)
+	txt.rename(old, new)
 	log.Printf("Renamed post %v to %v", old, new)
 	return m.list("")
 }
@@ -267,6 +268,7 @@ func (m post) save(file, postText string) (string, error) {
 	}
 	log.Printf("Saved post %q", file)
 	idx.update(file)
+	txt.update(file)
 	return m.list("")
 }
 

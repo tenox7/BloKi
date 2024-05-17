@@ -65,6 +65,11 @@ func (t *textSearch) rename(old, new string) {
 	t.add(new)
 }
 
+func (t *textSearch) update(file string) {
+	t.delete(file)
+	t.add(file)
+}
+
 func (t *textSearch) search(query string) []string {
 	if query == "" {
 		return nil
