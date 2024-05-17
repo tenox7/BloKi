@@ -4,7 +4,6 @@
 
 - better modern template
   - constant make width - 1000px in WP?
-  - templates to display link to bk-admin if enabled by flag
 - user comments
   - accounts: ???
   - spam: https://akismet.com/
