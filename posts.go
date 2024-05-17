@@ -25,6 +25,7 @@ type TemplateData struct {
 	PgOlder     int
 	PgOldest    int
 	LatestPosts string
+	AdminUrl    string
 }
 
 func renderMd(md []byte, name, published string) string {
@@ -114,6 +115,7 @@ func handlePosts(w http.ResponseWriter, r *http.Request) {
 		SubTitle:    *subTitle,
 		CharSet:     charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 		LatestPosts: func() string { idx.RLock(); defer idx.RUnlock(); return idx.latestPosts }(),
+		AdminUrl:    *adminUri,
 	}
 
 	switch {
