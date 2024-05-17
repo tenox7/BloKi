@@ -61,7 +61,7 @@ Currently there is no 2FA so please use a [strong password](https://xkcd.com/936
 
 ### Customizing look and feel (templates)
 
-By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
+By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel, create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
 
 ## Legal
 Copyright (c) 2024 by Antoni Sawicki
