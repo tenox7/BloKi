@@ -2,45 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Language" content="en-US">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="shortcut icon" href="/favicon.ico">
-    <title>{{.SiteName}}</title>
+    <title>Simple Kubrick WordPress Theme</title>
     <style>
-        body { margin: 0; padding-top: 20px; padding-left: 40px; padding-right: 40px; font-family: Tahoma, Arial, Geneva, sans-serif; font-size: 13px; }
-        a:link, a:visited { text-decoration: none; color: #0000CE; }
-        a:active { text-decoration: none; color: #FF0000; }
-        a:hover { text-decoration: none; color: #FF8000; background-color: #FFFFFF; }
-        .header { color: #FFFFFF; background-color: #45A6DA; text-align: center; padding: 20px; }
-        .header h1 { color: #FFFFFF; font-size: 40px; margin-bottom: 5px; }
-        .main-content { display: flex; justify-content: space-between; margin-top: 20px; }
-        .articles { width: 65%; padding: 20px; z-index: 1; }
-        .tools { width: 20%; background-color: #FAFAFA; padding: 20px; z-index: 0; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: "Trebuchet MS", "Lucida Grande", Arial, Tahoma, Geneva, sans-serif;
+            font-size: 12px;
+            background-color: #d5d6d7; 
+            text-align: left;
+        }
+        a:link, a:visited { 
+            text-decoration: none; 
+            color: #06c; 
+        }
+        a:active { 
+            text-decoration: none; 
+            color: #FF0000; 
+        }
+        a:hover { 
+            text-decoration: none; 
+            color: #FF8000; 
+            background-color: #FFFFFF; 
+        }
+        hr {
+            color: #ccc;
+        }
+        #container {
+            width: 760px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 0;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 4px #000; 
+        }
+        #header {
+            background-color: #008fc7;  
+            color: #fff;
+            padding: 20px 0;
+            margin: 10px;
+            text-align: center;
+            border: 0px;
+            border-radius: 10px;
+            font-size: 20px;
+        }
+        #content {
+            padding: 20px;
+        }
+        #sidebar {
+            width: 200px;
+            float: right;
+            padding: 20px;
+        }
+        #footer {
+            clear: both;
+            background-color: #eee;
+            color: #333;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 0 0 10px 10px;
+        }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>{{.SiteName}}</h1>
-        {{.SubTitle}}
-    </div>
-    <div class="main-content">
-        <div class="articles">
+    <div id="container">
+        <div id="header">
+            <h1 style="margin-bottom: 5px;">{{.SiteName}}</h1>
+            <small>{{.SubTitle}}<br>&nbsp;</small>
+        </div>
+        <div id="content">
+            <div id="sidebar">
+                <a href="/">Home</a>
+                <p><form action="/" method="post"><input type="text" name="query" size="10"> <input type="submit" value="Search"></form></p>
+                <p>Latest posts:</p>
+                {{.LatestPosts}}
+                <p>Tools:</p>
+                <p>&raquo; <a href="{{.AdminUrl}}">Site Admin</a></p>
+            </div>
             <a href="/">Home</a>
             {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">| &larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
             {{.Articles}}   
             {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
         </div>
-        <div class="tools">
-            <a href="/">Home</a>
-            <p><form action="/" method="post"><input type="text" name="query" size="15"> <input type="submit" value="Search"></form></p>
-            <p>Latest posts:</p>
-            {{.LatestPosts}}
-            <p><a href="{{.AdminUrl}}">Site Admin</a></p>
+        <div id="footer">
+            Copyright &copy; by authors of the {{.SiteName}} | <a href="https://github.com/tenox7/BloKi">BloKi</a> Modern Template
         </div>
-    </div>
-    <div style="text-align: center">
-        Copyright &copy; by authors of the {{.SiteName}} | <a href="https://github.com/tenox7/BloKi">BloKi</a> Modern Template
     </div>
 </body>
 </html>
