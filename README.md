@@ -48,9 +48,7 @@ bloki \
 
 ### Web Admin
 
-BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. You probably should
-change it to something else. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete and set passwords. To create user, simply
-set the password. The secrets file is required.
+BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete and set passwords. To create user, simply set the password. The secrets file is required for this.
 
 ```sh
 bloki -secrets /path/to/bloki.secrets  user  passwd  admin
@@ -64,5 +62,7 @@ Currently there is no 2FA so please use a [strong password](https://xkcd.com/936
 By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel, create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
 
 ## Legal
+
 Copyright (c) 2024 by Antoni Sawicki
+
 Licensed under Apache-2.0 license
