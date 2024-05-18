@@ -53,9 +53,10 @@ func renderError(name, errStr string) string {
 	return string("Article " + name + " " + errStr + "<p>\n\n")
 }
 
-func (t *TemplateData) renderArticle(name string, len int) {
+func (t *TemplateData) renderArticle(file string, len int) {
+	file = path.Base(unescapeOrEmpty(file))
 	idx.RLock()
-	m := idx.metaData[path.Base(unescapeOrEmpty(name))]
+	m := idx.metaData[file]
 	idx.RUnlock()
 	if m.published.IsZero() {
 		// TODO: searchPosts() may find unpublished articles, they would display an error
@@ -63,10 +64,10 @@ func (t *TemplateData) renderArticle(name string, len int) {
 		//t.Articles = renderError(name, "is not published") // TODO: better error handling
 		return
 	}
-	postMd, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(name))))
+	postMd, err := os.ReadFile(path.Join(*rootDir, *postsDir, file))
 	if err != nil {
-		log.Printf("unable to read post %q: %v", name, err)
-		t.Articles = renderError(name, "not found") // TODO: better error handling
+		log.Printf("unable to read post %q: %v", file, err)
+		t.Articles = renderError(file, "not found") // TODO: better error handling
 		return
 	}
 	// TODO: this is actually so lame, post can get chopped in middle of a tag
@@ -76,7 +77,7 @@ func (t *TemplateData) renderArticle(name string, len int) {
 	}
 	postMd = append(postMd, []byte("\n\n---\n\n")...)
 	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
-	t.Articles += renderMd(postMd, strings.TrimSuffix(name, ".md"), p)
+	t.Articles += renderMd(postMd, strings.TrimSuffix(file, ".md"), p)
 }
 
 func (t *TemplateData) paginatePosts(pg int) {
