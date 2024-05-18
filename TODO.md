@@ -2,6 +2,7 @@
 
 ## Major Features
 
+- auto create media and posts subfolder
 - better modern template
   - constant make width - 1000px in WP?
   - wp default theme
@@ -38,6 +39,7 @@
 
 ## Admin
 
+- admin publish/unpublish button with bytes.Replace()
 - 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp

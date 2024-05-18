@@ -73,10 +73,7 @@ func (t *TemplateData) renderArticle(file string, maxLen int) {
 		t.Articles = renderError(file, "not found") // TODO: better error handling
 		return
 	}
-	// TODO: this can be refactored for simplicity
-	// TODO: this is pretty lame implementation, in can chop in a middle of another tag
-	// also if the moreTag is inside code block, etc it will still chop on it :facepalm:
-	// ideally this should be a custom ast node and render hook
+	// TODO: refactor as a custom ast node and render hook instead
 	if maxLen > 0 {
 		postMd = postMd[:maxLen]
 		postMd = append(postMd, []byte("<BR>[Continue Reading...]("+m.url+")")...)
