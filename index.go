@@ -125,7 +125,7 @@ func (idx *postIndex) addOnly(name string) bool {
 		published: t,
 		author:    string(author[1]),
 		title:     strings.TrimSuffix(string(title[1]), "\r"),
-		url:       strings.TrimSuffix(name, ".md"),
+		url:       url.QueryEscape(strings.TrimSuffix(name, ".md")),
 	}
 	log.Printf("idx: added %q (%v)", name, idx.metaData[name].title)
 	return true
