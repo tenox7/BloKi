@@ -19,8 +19,6 @@
 
 - render node hook for /media/
 - wiki style links to post/media/etc
-- continue reading block element inside a post like in WP
-- continue reading working in search results
 - git integration
 - better error handling, use string builder
 - s3 support

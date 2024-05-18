@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +14,8 @@ import (
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 )
+
+var moreTag []byte = []byte("<!--more-->")
 
 type TemplateData struct {
 	SiteName    string
@@ -53,7 +56,7 @@ func renderError(name, errStr string) string {
 	return string("Article " + name + " " + errStr + "<p>\n\n")
 }
 
-func (t *TemplateData) renderArticle(file string, len int) {
+func (t *TemplateData) renderArticle(file string, maxLen int) {
 	file = path.Base(unescapeOrEmpty(file))
 	idx.RLock()
 	m := idx.metaData[file]
@@ -70,10 +73,16 @@ func (t *TemplateData) renderArticle(file string, len int) {
 		t.Articles = renderError(file, "not found") // TODO: better error handling
 		return
 	}
-	// TODO: this is actually so lame, post can get chopped in middle of a tag
-	if len > 0 {
-		postMd = postMd[:len]
-		postMd = append(postMd, []byte("... <BR>[Continue Reading...]("+m.url+")")...)
+	// TODO: this can be refactored for simplicity
+	if maxLen > 0 {
+		postMd = postMd[:maxLen]
+		postMd = append(postMd, []byte("<BR>[Continue Reading...]("+m.url+")")...)
+	} else if maxLen != -1 {
+		ix := bytes.Index(postMd, moreTag)
+		if ix != -1 {
+			postMd = postMd[:ix]
+			postMd = append(postMd, []byte("<BR>[Continue Reading...]("+m.url+")")...)
+		}
 	}
 	postMd = append(postMd, []byte("\n\n---\n\n")...)
 	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
@@ -121,7 +130,7 @@ func handlePosts(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case len(post) > 1:
-		td.renderArticle(post+".md", 0)
+		td.renderArticle(post+".md", -1)
 	case query != "":
 		td.searchPosts(query)
 	default:
