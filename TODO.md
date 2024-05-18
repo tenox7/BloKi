@@ -4,6 +4,10 @@
 
 - better modern template
   - constant make width - 1000px in WP?
+  - wp default theme
+    https://wordpress.org/themes/default/
+  - twenty eleven theme
+    https://wordpress.org/themes/twentyeleven/
 - user comments
   - accounts: ???
   - spam: https://akismet.com/
