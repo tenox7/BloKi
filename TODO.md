@@ -49,3 +49,7 @@
 - fancy, 3rd party, javascript based markdown editor
 - sort by different columns name/author/published/modified
 - preview mode, render unpublished article with authentication
+
+## Tech Debt
+
+- more tag/continue reading refactor
