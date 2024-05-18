@@ -73,7 +73,7 @@ func (t *TemplateData) renderArticle(file string, len int) {
 	// TODO: this is actually so lame, post can get chopped in middle of a tag
 	if len > 0 {
 		postMd = postMd[:len]
-		postMd = append(postMd, []byte("... <BR>Continue Reading... ")...)
+		postMd = append(postMd, []byte("... <BR>[Continue Reading...]("+m.url+")")...)
 	}
 	postMd = append(postMd, []byte("\n\n---\n\n")...)
 	p := "By " + m.author + ", First published: " + m.published.Format(timeFormat) + ", Last updated: " + m.modified.Format(timeFormat)
