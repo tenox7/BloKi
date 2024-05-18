@@ -250,11 +250,20 @@ func main() {
 		}
 		err = os.WriteFile(
 			path.Join(*rootDir, *postsDir, "my-first-post.md"),
-			[]byte("[//]: # (published="+time.Now().Format(timeFormat)+")\n\n# My first blog post!\n\nHello World!\n\n"),
+			[]byte("<!--published=\""+time.Now().Format(timeFormat)+"\"-->\n\n# My first blog post!\n\nHello World!\n\n"),
 			0644,
 		)
 		if err != nil {
 			log.Fatalf("Unable to create first post: %v", err)
+		}
+	} else if !st.IsDir() {
+		log.Fatalf("%v is a file", path.Join(*rootDir, *postsDir))
+	}
+	st, err = os.Stat(path.Join(*rootDir, *mediaDir))
+	if os.IsNotExist(err) {
+		err = os.Mkdir(path.Join(*rootDir, *mediaDir), 0755)
+		if err != nil {
+			log.Fatalf("Unable to create media directory: %v", err)
 		}
 	} else if !st.IsDir() {
 		log.Fatalf("%v is a file", path.Join(*rootDir, *postsDir))

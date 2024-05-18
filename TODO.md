@@ -2,7 +2,6 @@
 
 ## Major Features
 
-- auto create media and posts subfolder
 - better modern template
   - constant make width - 1000px in WP?
   - wp default theme
