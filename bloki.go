@@ -27,7 +27,7 @@ import (
 
 var (
 	siteName = flag.String("site_name", "My Blog", "Name of your blog")
-	subTitle = flag.String("subtitle", "&nbsp;", "Subtitle")
+	subTitle = flag.String("subtitle", "Blog about awesome things!", "Subtitle")
 	artPerPg = flag.Int("articles_per_page", 3, "number of articles per page")
 	ltsPosts = flag.Int("latest_posts", 15, "number of latests posts on the side")
 	adminUri = flag.String("admin_uri", "/bk-admin/", "address of the admin interface")
