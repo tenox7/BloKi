@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <title>{{.SiteName}}</title>
+    <style>
+        a {
+            text-decoration: none;
+        }
+        a:active, a:hover {
+            color: #ff8000;
+        }
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 12px;
+            margin: 0;
+            padding: 20px;
+            background: #e2e2e2;
+        }
+        .container {
+            width: 940px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
+        header {
+            background: #fff;
+            color: #000;
+            padding: 40px;
+            text-align: left;
+        }
+        .head-search {
+            display: flex;
+            align-items: center;
+        }
+        .image-banner {
+            width: 940px;
+            height: 197px;
+            background-image: url('/media/modern2.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+        nav {
+            background: #000;
+            color: #fff;
+            padding: 10px 40px;
+            text-align: left;
+        }
+        nav a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 15px;
+            font-weight: bold;
+        }
+        nav a:hover a:link a:visited {
+            color: #fff;
+        }
+        .content {
+            display: flex;
+            margin: 20px;
+        }
+        .content a {
+            color: #000;
+        }
+        .content a:active,  a:hover {
+            color: #ff8000;
+        }
+        .main-content {
+            flex: 1;
+            padding-right: 20px;
+        }
+        .sidebar {
+            width: 200px;
+        }
+        footer {
+            text-align: center;
+            padding: 5px;
+            background: #f9f9f9;
+            color: #000;
+            margin-top: 20px;
+        }
+        hr {
+            size: 1px;
+            color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="head-search">
+                <div style="flex:1;">
+                    <h1 style="margin-bottom: 0px;">{{.SiteName}}</h1>
+                    <small>{{.SubTitle}}</small>
+                </div>
+                <div style="flex:1;  text-align: right;">
+                    <form action="/" method="post"><input type="text" name="query" size="15"></form>
+                </div>
+            </div>
+        </header>
+        <div class="image-banner">
+        </div>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/">About</a>
+        </nav>
+        <div class="content">
+            <div class="main-content">
+                <a href="/">Home</a>
+                {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">| &larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
+                {{.Articles}}
+                {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
+            </div>
+            <div class="sidebar">
+                <a href="/">Home</a>
+                <h4>Latest posts:</h4>
+                {{.LatestPosts}}
+                <h4>Tools:</h4>
+                <p>&raquo; <a href="{{.AdminUrl}}">Site Admin</a></p>
+            </div>
+        </div>
+        <footer>
+            <p>Copyright &copy; by authors of the {{.SiteName}} | <a href="https://github.com/tenox7/BloKi">BloKi</a> Modern 2 Template</p>
+        </footer>
+    </div>
+</body>
+</html>
