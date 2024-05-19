@@ -22,23 +22,24 @@
         --></STYLE>
     </HEAD>
     <BODY BGCOLOR="#FFFFFF">
-        <TABLE WIDTH="700" BGCOLOR="#FFFFFF" CELLPADDING="40" CELLSPACING="0" BORDER="0">
+        <TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="40" CELLSPACING="0" BORDER="0">
             <TR BGCOLOR="#0099FF">
                 <TD HEIGHT="100" COLSPAN="2">
-                    <H1 STYLE="color: #FFFFFF; font-size: 40px;">{{.SiteName}}</H1>
-                    {{.SubTitle}}
+                    <SPAN STYLE="font-size: 40px; color: #FFFFFF;">{{.SiteName}}</SPAN>
+                    <BR>
+                    <SPAN STYLE="font-size: 15px; color: #FFFFFF;">{{.SubTitle}}</SPAN>
                 </TD>
             </TR>
             <TR>
-                <TD WIDTH="80%" VALIGN="top">
+                <TD WIDTH="70%" VALIGN="top">
                     <A HREF="/">Home</A>
 {{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
-{{ .Articles }}   
+{{ .Articles }}
 {{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
                 </TD>
-                <TD WIDTH="20%" VALIGN="top" BGCOLOR="#FEFEFE">
+                <TD WIDTH="30%" VALIGN="top" BGCOLOR="#FEFEFE">
                     <A HREF="/">Home</A><BR>
-                        <P><FORM ACTION="/"><INPUT TYPE="text" METHOD="POST" NAME="query" SIZE="15"> <INPUT TYPE="submit" VALUE="Search"></FORM></P>
+                        <FORM ACTION="/"><INPUT TYPE="text" METHOD="POST" NAME="query" SIZE="10"> <INPUT TYPE="submit" VALUE="Search"></FORM>
                         <P>Latest posts:</P>
                         {{.LatestPosts}}
                         <P><A HREF="{{.AdminUrl}}">Site Admin</A></P>
