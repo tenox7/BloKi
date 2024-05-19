@@ -109,7 +109,7 @@
         </nav>
         <div class="content">
             <div class="main-content">
-                {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">| &larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
+                {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
                 {{.Articles}}
                 {{ if gt .Page 0 }}<a href="/?pg={{ .PgNewer }}">&larr; Newer Posts</a>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<a href="/?pg={{ .PgOlder }}">Older Posts &rarr;</a>{{ end }}<br>
             </div>
