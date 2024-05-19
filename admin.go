@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/subtle"
@@ -397,7 +398,7 @@ func (c creds) user(w http.ResponseWriter, r *http.Request) (string, bool) {
 }
 
 func (creds) auth(user, pass string) bool {
-	jpwd, err := secretsStore.Get(nil, adminPrefix+user)
+	jpwd, err := secretsStore.Get(context.TODO(), adminPrefix+user)
 	if err != nil {
 		return false
 	}
@@ -425,14 +426,14 @@ func (creds) set(user, pass string) error {
 	if err != nil {
 		return err
 	}
-	return secretsStore.Put(nil, adminPrefix+user, spwd)
+	return secretsStore.Put(context.TODO(), adminPrefix+user, spwd)
 }
 
 func (creds) del(user string) error {
 	if *secrets == "" || secretsStore == nil {
 		return errors.New("unable to open user db")
 	}
-	return secretsStore.Delete(nil, adminPrefix+user)
+	return secretsStore.Delete(context.TODO(), adminPrefix+user)
 }
 
 func (c creds) manager() {
