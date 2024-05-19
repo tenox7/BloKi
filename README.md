@@ -2,7 +2,7 @@
 
 # BloKi - A minimalistic Blog and Wiki Engine
 
-If you are looking for a small, simple, easy to use,  micro blog/wiki platform that looks like WordPress / MediaWiki, but loathe the bloat of LAMP stack, this might be just for you.
+If you are looking for a small, simple, easy to use,  micro blog/wiki platform that looks like WordPress / MediaWiki, but loathe the bloat of the LAMP stack, this might be just for you.
 
 ## Main features
 
