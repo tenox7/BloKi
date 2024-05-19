@@ -21,9 +21,36 @@ If you are looking for a small, simple, easy to use,  micro blog/wiki platform t
 ## Current status
 
 - Basic blog engine and admin UI works.
+- Search, pagination, markdown, images, etc.
 - You can see a working example on [dogfood blog](https://blog.tenox.net/)
 
 ## Running BloKi
+
+To try BloKi, download a binary from the [releases page](https://github.com/tenox7/BloKi/releases). Run
+it like so:
+
+```sh
+chmod 755 bloki
+./bloki
+```
+
+A sample starting post will be created, which you can edit using any editor of your choice.
+
+### Web Admin
+
+BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete and set passwords. To create user, simply set the password. The secrets file is required for this.
+
+```sh
+bloki -secrets /path/to/bloki.secrets  user  passwd  admin
+New Password: ...
+```
+
+Currently there is no 2FA so please use a [strong password](https://xkcd.com/936/).
+
+### Site Directory
+
+By default BloKi looks for `./site` in the current directory. You can specify your own site folder
+with `-root_dir /path/to/site` flag.
 
 ### Service Files
 
@@ -45,17 +72,6 @@ bloki \
     -acm_host blog.mysite.net \
     ...
 ```
-
-### Web Admin
-
-BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete and set passwords. To create user, simply set the password. The secrets file is required for this.
-
-```sh
-bloki -secrets /path/to/bloki.secrets  user  passwd  admin
-New Password: ...
-```
-
-Currently there is no 2FA so please use a [strong password](https://xkcd.com/936/).
 
 ### Customizing look and feel (templates)
 

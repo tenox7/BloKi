@@ -240,8 +240,17 @@ func main() {
 		log.Printf("Setuid UID=%d GID=%d", os.Geteuid(), os.Getgid())
 	}
 
-	// check articles & media
-	st, err := os.Stat(path.Join(*rootDir, *postsDir))
+	// check site, articles & media
+	st, err := os.Stat(*rootDir)
+	if os.IsNotExist(err) {
+		err = os.Mkdir(*rootDir, 0755)
+		if err != nil {
+			log.Fatalf("Unable to create site directory: %v", err)
+		}
+	} else if !st.IsDir() {
+		log.Fatalf("%v is a file", *rootDir)
+	}
+	st, err = os.Stat(path.Join(*rootDir, *postsDir))
 	if os.IsNotExist(err) {
 		log.Print("articles did not exist, creating")
 		err = os.Mkdir(path.Join(*rootDir, *postsDir), 0755)
