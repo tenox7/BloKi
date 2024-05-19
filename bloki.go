@@ -52,7 +52,7 @@ var (
 	//go:embed favicon.ico
 	favIcon []byte
 
-	//go:embed templates/*.html
+	//go:embed templates/admin.html templates/modern.html templates/legacy.html templates/vintage.html
 	templateFS embed.FS
 
 	templates    map[string]*template.Template
