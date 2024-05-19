@@ -116,7 +116,8 @@ func (m post) new(file, user string) (string, error) {
 		return "", fmt.Errorf("new post file %q already exists", file)
 	}
 	_, err = m.save(file,
-		"[//]: # (not-published="+time.Now().Format(timeFormat)+")\n[//]: # (author="+user+")\n\n# New Post!\n\nHello world!\n\n")
+		"<!--not-published=\""+time.Now().Format(timeFormat)+"\"-->\n"+
+			"<!--author=\""+user+"\"-->\n\n# New Post!\n\nHello world!\n\n")
 	if err != nil {
 		log.Printf("Unable to save post %q: %v", file, err)
 		return "", err
