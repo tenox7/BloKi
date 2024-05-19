@@ -21,6 +21,8 @@ import (
 	"time"
 )
 
+const adminPrefix = "admin:"
+
 var bgf = map[bool]string{false: "#FFFFFF", true: "#E0E0E0"}
 
 type AdminTemplate struct {
@@ -395,7 +397,7 @@ func (c creds) user(w http.ResponseWriter, r *http.Request) (string, bool) {
 }
 
 func (creds) auth(user, pass string) bool {
-	jpwd, err := secretsStore.Get(nil, "user:"+user)
+	jpwd, err := secretsStore.Get(nil, adminPrefix+user)
 	if err != nil {
 		return false
 	}
@@ -423,14 +425,14 @@ func (creds) set(user, pass string) error {
 	if err != nil {
 		return err
 	}
-	return secretsStore.Put(nil, "user:"+user, spwd)
+	return secretsStore.Put(nil, adminPrefix+user, spwd)
 }
 
 func (creds) del(user string) error {
 	if *secrets == "" || secretsStore == nil {
 		return errors.New("unable to open user db")
 	}
-	return secretsStore.Delete(nil, "user:"+user)
+	return secretsStore.Delete(nil, adminPrefix+user)
 }
 
 func (c creds) manager() {
@@ -460,7 +462,7 @@ func (c creds) manager() {
 			log.Fatal(err)
 		}
 		for _, u := range usr {
-			if !strings.HasPrefix(u, "user:") {
+			if !strings.HasPrefix(u, adminPrefix) {
 				continue
 			}
 			fmt.Println(strings.Split(u, ":")[1])
