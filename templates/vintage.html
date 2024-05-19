@@ -5,19 +5,19 @@
     <BODY BGCOLOR="#FFFFFF">
         <TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="40" CELLSPACING="0" BORDER="0">
             <TR BGCOLOR="#45A6DA">
-                <TD HEIGHT="100">
+                <TD HEIGHT="100" ALIGN="CENTER">
                     <H1>{{.SiteName}}</H1>
                     {{.SubTitle}}
                 </TD>
             </TR>
             <TR>
-                <TD WIDTH="80%">
+                <TD WIDTH="70%">
                     <A HREF="/">Home</A>
 {{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
-{{.Articles}}   
+{{.Articles}}
 {{ if gt .Page 0 }}<A HREF="/?pg={{ .PgNewer }}">&lt; Newer Posts</A>{{ end }}&nbsp;{{ if lt .Page .PgOldest }}|&nbsp;<A HREF="/?pg={{ .PgOlder }}">Older Posts &gt;</A>{{ end }}<BR>
                 </TD>
-                <TD WIDTH="20%" BGCOLOR="#FEFEFE" VALIGN="top">
+                <TD WIDTH="30%" BGCOLOR="#FEFEFE" VALIGN="top">
                     <A HREF="/">Home</A><P>
                         <FORM ACTION="/"><INPUT TYPE="text" METHOD="POST" NAME="query" SIZE="15"> <INPUT TYPE="submit" VALUE="Search"></FORM><P>
                         Latest posts:<P>
