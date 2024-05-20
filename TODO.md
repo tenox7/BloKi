@@ -2,12 +2,6 @@
 
 ## Major Features
 
-- better modern template
-  - constant make width - 1000px in WP?
-  - wp default theme
-    https://wordpress.org/themes/default/
-  - twenty eleven theme
-    https://wordpress.org/themes/twentyeleven/
 - user comments
   - accounts: ???
   - spam: https://akismet.com/
@@ -17,17 +11,17 @@
 
 ## Core Engine
 
+- git integration
 - render node hook for /media/
 - wiki style links to post/media/etc
-- git integration
 - better error handling, use string builder
-- s3 support
 - render to static site
 - render cache
 - throttle qps
 - statistics module, page views, latencies, etc
 - reindex on inotify (incl rename/move)
 - reindex on signal
+- s3 support
 
 ## Runtimes
 
@@ -52,4 +46,4 @@
 
 ## Tech Debt
 
-- more tag/continue reading refactor
+- "more" tag/continue reading refactor as ast node
