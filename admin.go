@@ -366,7 +366,7 @@ func (media) list() (string, error) {
 				strings.HasSuffix(i.Name(), ".gif")) {
 			continue
 		}
-		if x%8 == 0 {
+		if x%5 == 0 {
 			buf.WriteString("</TR><TR>")
 		}
 		nm := html.EscapeString(i.Name())
