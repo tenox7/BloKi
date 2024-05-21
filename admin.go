@@ -391,7 +391,7 @@ func (media) list() (string, error) {
 func (users) list() (string, error) {
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Users</H1>
-	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
+	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="users">
 	<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="New User" ONCLICK="this.value=prompt('Name the new user:', '');">
 	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this user?');">
 	<P>
