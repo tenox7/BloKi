@@ -32,7 +32,6 @@
 
 ## Admin
 
-- admin publish/unpublish button with bytes.Replace()
 - 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
@@ -43,6 +42,7 @@
 - fancy, 3rd party, javascript based markdown editor
 - sort by different columns name/author/published/modified
 - preview mode, render unpublished article with authentication
+- admin publish/unpublish button with bytes.Replace()
 
 ## Tech Debt
 
