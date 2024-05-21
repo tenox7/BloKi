@@ -38,6 +38,7 @@ type AdminTemplate struct {
 type post struct{}
 type media struct{}
 type creds struct{}
+type users struct{}
 
 func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
@@ -89,6 +90,10 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		default:
 			adm.AdminTab, err = m.list()
 		}
+	case "users":
+		m := users{}
+		adm.ActiveTab = "users"
+		adm.AdminTab, err = m.list()
 	default:
 		adm.AdminTab = "<H1>Not Implemented</H1><P>"
 	}
@@ -378,6 +383,33 @@ func (media) list() (string, error) {
 			<INPUT TYPE="radio" NAME="filename" VALUE="` + un + `">
 			<A HREF="/media/` + un + `">` + nm + `</A></TD>
 		`)
+	}
+	buf.WriteString("</TR></TABLE>\n")
+	return buf.String(), nil
+}
+
+func (users) list() (string, error) {
+	buf := strings.Builder{}
+	buf.WriteString(`<H1>Users</H1>
+	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="posts">
+	<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="New User" ONCLICK="this.value=prompt('Name the new user:', '');">
+	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this user?');">
+	<P>
+	<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
+	<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Username</TH><TH>Type</TH></TR>
+	`)
+	usr, err := secretsStore.Keys()
+	if err != nil {
+		log.Fatal(err)
+	}
+	for i, u := range usr {
+		if !strings.HasPrefix(u, adminPrefix) {
+			continue
+		}
+		u = strings.Split(u, ":")[1]
+		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
+			"<TD><INPUT TYPE=\"radio\" NAME=\"username\" VALUE=\"" + u + "\">&nbsp;" + html.EscapeString(u) + "</TD>" +
+			"<TD>admin</TD></TR>\n")
 	}
 	buf.WriteString("</TR></TABLE>\n")
 	return buf.String(), nil
