@@ -19,7 +19,7 @@
             td, th { font-family: Tahoma, Arial, Geneva, sans-serif; font-size:13px; margin:0px;  border:none; }
             input, div { font-family: Tahoma, Arial, Geneva, sans-serif; font-size:13px; }
             .container { width:100%; }
-            .header { width:95%; background-color:#000000; padding:10px; color:#FFFFFF; font-weight:bold; background-color: #000000; }
+            .header { width:95%; background-color:#000000; padding:10px; color:#FFFFFF; font-weight:bold; background-color: #000000; display: flex; align-items: center; }
             .header A:link { color:#FFFFFF;   }
             .header A:visited { color:#FFFFFF;   }
             .sidebar { color:#FFFFFF;  width:10%; float:left; background-color:#000000; }
@@ -36,7 +36,12 @@
 <FORM ACTION="{{.AdminUrl}}" METHOD="POST" ENCTYPE="multipart/form-data">
     <DIV CLASS="container">
         <DIV CLASS="header">
-            BloKi Admin - <A HREF="/">{{.SiteName}}</A>
+            <DIV STYLE="flex:1;  text-align: left;">
+                BloKi Admin - <A HREF="/">{{.SiteName}}</A>
+            </DIV>
+            <DIV STYLE="flex:1;  text-align: right;">
+                Howdy, {{.UserName}}
+            </DIV>
         </DIV>
         <DIV CLASS="sidebar">
             <DIV CLASS="{{if eq .ActiveTab "posts"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=posts">Posts</A></DIV>

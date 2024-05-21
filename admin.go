@@ -31,7 +31,7 @@ type AdminTemplate struct {
 	AdminTab  string
 	ActiveTab string
 	AdminUrl  string
-	User      string
+	UserName  string
 	CharSet   string
 }
 
@@ -53,7 +53,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	adm := AdminTemplate{
 		SiteName: *siteName,
 		AdminUrl: *adminUri,
-		User:     user,
+		UserName: user,
 		CharSet:  charset[strings.HasPrefix(r.UserAgent(), "Mozilla/5")],
 	}
 
