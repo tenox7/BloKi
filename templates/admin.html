@@ -36,15 +36,12 @@
 <FORM ACTION="{{.AdminUrl}}" METHOD="POST" ENCTYPE="multipart/form-data">
     <DIV CLASS="container">
         <DIV CLASS="header">
-            BloKi Admin - <A HREF="/">{{.SiteName}}</A> 
+            BloKi Admin - <A HREF="/">{{.SiteName}}</A>
         </DIV>
         <DIV CLASS="sidebar">
             <DIV CLASS="{{if eq .ActiveTab "posts"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=posts">Posts</A></DIV>
             <DIV CLASS="{{if eq .ActiveTab "media"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=media">Media</A></DIV>
-            <DIV CLASS="{{if eq .ActiveTab "tags"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=tags">Tags</A></DIV>
-            <DIV CLASS="{{if eq .ActiveTab "comments"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=comments">Comments</A></DIV>
             <DIV CLASS="{{if eq .ActiveTab "users"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=users">Users</A></DIV>
-            <DIV CLASS="{{if eq .ActiveTab "stats"}}active{{else}}menuitem{{end}}"><A HREF="{{.AdminUrl}}?tab=stats">Stats</A></DIV>
         </DIV>
         <DIV CLASS="content">
             {{.AdminTab}}
