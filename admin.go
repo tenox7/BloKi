@@ -93,7 +93,10 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	case "users":
 		m := users{}
 		adm.ActiveTab = "users"
-		adm.AdminTab, err = m.list()
+		switch {
+		default:
+			adm.AdminTab, err = m.list()
+		}
 	default:
 		adm.AdminTab = "<H1>Not Implemented</H1><P>"
 	}
@@ -393,6 +396,7 @@ func (users) list() (string, error) {
 	buf.WriteString(`<H1>Users</H1>
 	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="users">
 	<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="New User" ONCLICK="this.value=prompt('Name the new user:', '');">
+	<INPUT TYPE="SUBMIT" NAME="passwd" VALUE="Reset Password" ONCLICK="this.value=prompt('Enter new password:', '');">
 	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this user?');">
 	<P>
 	<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">

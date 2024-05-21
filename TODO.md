@@ -32,6 +32,8 @@
 
 ## Admin
 
+- user password do not echo
+  https://pkg.go.dev/golang.org/x/crypto/ssh/terminal?utm_source=godoc#Terminal.ReadPassword
 - 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
@@ -43,6 +45,7 @@
 - sort by different columns name/author/published/modified
 - preview mode, render unpublished article with authentication
 - admin publish/unpublish button with bytes.Replace()
+- real dialogs instead of javascript popups
 
 ## Tech Debt
 
