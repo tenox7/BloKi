@@ -21,7 +21,7 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 const adminPrefix = "admin:"
@@ -534,7 +534,7 @@ func cliUserManager() {
 			log.Fatal("usage: bloki user passwd <username>")
 		}
 		fmt.Print("New Password: ")
-		pwd, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+		pwd, err := term.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			log.Fatal(err)
 		}
