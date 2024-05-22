@@ -406,7 +406,7 @@ func (users) list() (string, error) {
 	`)
 	usr, err := secretsStore.Keys()
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 	for i, u := range usr {
 		if !strings.HasPrefix(u, adminPrefix) {
