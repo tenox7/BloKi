@@ -1,4 +1,4 @@
-![logo](theme.png)
+![theme](theme.png)
 
 # BloKi - A minimalistic Blog and Wiki Engine
 
@@ -76,6 +76,8 @@ bloki \
 ### Customizing look and feel (templates)
 
 By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel, create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
+
+![seveneleven](seveneleven.png)
 
 There also is a new "seven eleven" template. To install it, download [seveneleven.html](https://raw.githubusercontent.com/tenox7/BloKi/main/templates/seveneleven.html) as `site/templates/modern.html`. Also download the header image [seveneleven.jpg](https://raw.githubusercontent.com/tenox7/BloKi/main/templates/seveneleven.jpg) as `site/media/seveneleven.jpg`. Restart BloKi.
 
