@@ -404,11 +404,7 @@ func (users) list() (string, error) {
 	<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
 	<TR ALIGN="LEFT"><TH>&nbsp;&nbsp;Username</TH><TH>Type</TH></TR>
 	`)
-	usr, err := secretsStore.Keys()
-	if err != nil {
-		return "", err
-	}
-	for i, u := range usr {
+	for i, u := range secretsStore.Keys() {
 		if !strings.HasPrefix(u, adminPrefix) {
 			continue
 		}
@@ -452,7 +448,7 @@ func (creds) auth(user, pass string) bool {
 
 func (creds) set(user, pass string) error {
 	if *secrets == "" || secretsStore == nil {
-		return errors.New("unable to open user db")
+		return errors.New("unable to access secret store")
 	}
 	buff := make([]byte, 8)
 	_, err := rand.Read(buff)
@@ -504,11 +500,7 @@ func cliUserManager() {
 			log.Fatal(err)
 		}
 	case "list":
-		usr, err := secretsStore.Keys()
-		if err != nil {
-			log.Fatal(err)
-		}
-		for _, u := range usr {
+		for _, u := range secretsStore.Keys() {
 			if !strings.HasPrefix(u, adminPrefix) {
 				continue
 			}

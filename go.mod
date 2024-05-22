@@ -5,7 +5,7 @@ go 1.21.5
 require (
 	github.com/blevesearch/bleve/v2 v2.4.0
 	github.com/gomarkdown/markdown v0.0.0-20240419095408-642f0ee99ae2
-	github.com/tenox7/tkvs v0.0.0-20240512204442-e0179b1f2b31
+	github.com/tenox7/tkvs v1.0.0
 	golang.org/x/crypto v0.23.0
 )
 
