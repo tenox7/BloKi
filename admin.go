@@ -20,6 +20,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 const adminPrefix = "admin:"
@@ -479,13 +481,16 @@ func (c creds) manager() {
 		if flag.Arg(2) == "" {
 			log.Fatal("usage: bloki user passwd <username>")
 		}
-		var pwd string
-		fmt.Print("New Password (WILL ECHO): ")
-		fmt.Scanln(&pwd)
-		err := c.set(flag.Arg(2), pwd)
+		fmt.Print("New Password: ")
+		pwd, err := terminal.ReadPassword(int(os.Stdin.Fd()))
 		if err != nil {
 			log.Fatal(err)
 		}
+		err = c.set(flag.Arg(2), string(pwd))
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("")
 	case "delete":
 		if flag.Arg(2) == "" {
 			log.Fatal("usage: bloki user delete <username>")

@@ -38,7 +38,7 @@ A sample starting post will be created, which you can edit using any editor of y
 
 ### Web Admin
 
-BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete and set passwords. To create user, simply set the password. The secrets file is required for this.
+BloKi web admin is available under `/bk-admin/` url, defined by `-admin_uri` flag. In order to log in for the first time, a user will need to be created from command line. You can use the `user` command to list, delete users and set passwords. To create a user, simply set their password. The secrets file is required for this. Example:
 
 ```sh
 bloki -secrets /path/to/bloki.secrets  user  passwd  admin
