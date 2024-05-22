@@ -183,8 +183,7 @@ func main() {
 		if secretsStore == nil {
 			log.Fatal("The secrets file must be specified")
 		}
-		c := creds{}
-		c.manager()
+		userManager()
 		return
 	}
 

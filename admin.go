@@ -475,7 +475,8 @@ func (creds) del(user string) error {
 	return secretsStore.Delete(context.TODO(), adminPrefix+user)
 }
 
-func (c creds) manager() {
+func userManager() {
+	c := creds{}
 	switch flag.Arg(1) {
 	case "passwd":
 		if flag.Arg(2) == "" {
