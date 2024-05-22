@@ -96,8 +96,14 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		m := users{}
 		adm.ActiveTab = "users"
 		switch {
+		case r.FormValue("newuser") != "":
+			adm.AdminTab, err = m.newuser(r.FormValue("newuser"))
+		case r.FormValue("delete") == "true":
+			adm.AdminTab, err = m.delete(r.FormValue("username"))
+		case r.FormValue("passwd") != "":
+			adm.AdminTab, err = m.passwd(r.FormValue("username"), r.FormValue("passwd"))
 		default:
-			adm.AdminTab, err = m.list()
+			adm.AdminTab, err = m.list("")
 		}
 	default:
 		adm.AdminTab = "<H1>Not Implemented</H1><P>"
@@ -393,12 +399,58 @@ func (media) list() (string, error) {
 	return buf.String(), nil
 }
 
-func (users) list() (string, error) {
+func (u users) newuser(usr string) (string, error) {
+	if usr == "" {
+		return u.list("")
+	}
+	cr := creds{}
+	pwd := func(n int) string {
+		b := make([]byte, n)
+		rand.Read(b)
+		return fmt.Sprintf("%x", b)[:n]
+	}(20)
+	err := cr.set(usr, pwd)
+	if err != nil {
+		log.Printf("unable to set password for %q:%v", usr, err)
+		return "", err
+	}
+	return u.list(html.EscapeString(fmt.Sprintf("User %q created. The password is: %q", usr, pwd)))
+}
+
+func (u users) delete(usr string) (string, error) {
+	if usr == "" {
+		return u.list("")
+	}
+	cr := creds{}
+	err := cr.del(usr)
+	if err != nil {
+		return "", err
+	}
+	return u.list("Deleted user: " + html.EscapeString(usr))
+}
+
+func (u users) passwd(user, password string) (string, error) {
+	if user == "" {
+		return u.list("")
+	}
+	cr := creds{}
+	err := cr.set(user, password)
+	if err != nil {
+		return "", err
+	}
+	return u.list("Changed password for user: " + html.EscapeString(user))
+}
+
+func (u users) list(msg string) (string, error) {
+	if msg != "" {
+		msg = msg + "<P>\n"
+	}
 	buf := strings.Builder{}
 	buf.WriteString(`<H1>Users</H1>
+	` + msg + `
 	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="users">
 	<INPUT TYPE="SUBMIT" NAME="newuser" VALUE="New User" ONCLICK="this.value=prompt('Name the new user:', '');">
-	<INPUT TYPE="SUBMIT" NAME="passwd" VALUE="Reset Password" ONCLICK="this.value=prompt('Enter new password:', '');">
+	<INPUT TYPE="SUBMIT" NAME="passwd" VALUE="Reset Password" ONCLICK="this.value=prompt('Enter new password:\nWARNING: the password will echo!', '');">
 	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this user?');">
 	<P>
 	<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">

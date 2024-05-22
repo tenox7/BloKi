@@ -36,8 +36,8 @@
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
   https://www.twilio.com/docs/verify/quickstarts/totp
-- user manager
 - better error messages than text
+  perhaps pass messages like for users.list()
 - stats
 - fancy, 3rd party, javascript based markdown editor
 - sort by different columns name/author/published/modified
