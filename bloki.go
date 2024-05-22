@@ -180,10 +180,7 @@ func main() {
 
 	// manage users
 	if flag.Arg(0) == "user" {
-		if secretsStore == nil {
-			log.Fatal("The secrets file must be specified")
-		}
-		userManager()
+		cliUserManager()
 		return
 	}
 

@@ -475,7 +475,10 @@ func (creds) del(user string) error {
 	return secretsStore.Delete(context.TODO(), adminPrefix+user)
 }
 
-func userManager() {
+func cliUserManager() {
+	if secretsStore == nil {
+		log.Fatal("The secrets file must be specified")
+	}
 	c := creds{}
 	switch flag.Arg(1) {
 	case "passwd":
