@@ -86,10 +86,8 @@ docker run -d \
     -acm_host blog.mysite.net \
     -secrets /bloki.secrets \
     -chroot
-    -setuid 1000:1000
+    -setuid $(id -u):$(id -g)
 ```
-
-Make sure to set `-setuid` to your user, you can use `-setuid $(id -u):$(id -g)` for convenience.
 
 ## Auto SSL/TLS Certs / ACME / Lets Encrypt
 
