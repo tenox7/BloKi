@@ -81,7 +81,7 @@ docker run -d \
     tenox7/bloki:latest \
     -site_name "My Blog" \
     -subtitle "Blog about cool shit" \
-    -addr=:8443 \
+    -addr :8443 \
     -acm_addr :8080 \
     -acm_host blog.mysite.net \
     -secrets /bloki.secrets \

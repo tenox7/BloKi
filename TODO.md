@@ -20,22 +20,22 @@
 - statistics module, page views, latencies, etc
 - reindex on inotify (incl rename/move)
 - reindex on signal
-- s3 support
+- gcs, s3 support
+- aix, plan9 support
 
 ## Runtimes
 
 - fastcgi
-- cloud run, fargate
-- lambda, cloud functions
+- cloud run, fargate, lambda, app runner, cloud functions
+- windows service, app-v
 
 ## Admin
 
-- 2fa for admin login
+- better error messages than text
+  perhaps pass messages like for users.list()- 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
   https://www.twilio.com/docs/verify/quickstarts/totp
-- better error messages than text
-  perhaps pass messages like for users.list()
 - stats
 - fancy, 3rd party, javascript based markdown editor
 - sort by different columns name/author/published/modified
