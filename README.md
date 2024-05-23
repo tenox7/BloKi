@@ -61,6 +61,8 @@ open the secrets store before entering chroot. However you can also chroot and s
 
 ## Docker
 
+The Docker Hub image name is: `tenox7/bloki:latest`
+
 Hello world:
 
 ```sh
@@ -70,7 +72,8 @@ docker run -it --rm -p 8080:8080 -v /home/tenox/site:/site tenox7/bloki:latest
 Full site example:
 
 ```sh
-docker run -d --restart=always \
+docker run -d \
+    --restart=always \
     -p 80:8080 \
     -p 443:8443 \
     -v /home/myuser/site:/site \
@@ -81,8 +84,12 @@ docker run -d --restart=always \
     -addr=:8443 \
     -acm_addr :8080 \
     -acm_host blog.mysite.net \
-    -secrets /bloki.secrets
+    -secrets /bloki.secrets \
+    -chroot
+    -setuid 1000:1000
 ```
+
+Make sure to set `-setuid` to your user, you can use `-setuid $(id -u):$(id -g)` for convenience.
 
 ## Auto SSL/TLS Certs / ACME / Lets Encrypt
 
