@@ -59,7 +59,32 @@ either a privileged account or set of capabilities to bind to port 80 and 443. W
 file, it is recommended to start BloKi as root with `-chroot` and `-setuid` flags. This way BloKi can
 open the secrets store before entering chroot. However you can also chroot and setuid from systemd.
 
-### Auto SSL/TLS Certs / ACME / Lets Encrypt
+## Docker
+
+Hello world:
+
+```sh
+docker run -it --rm -p 8080:8080 -v /home/tenox/site:/site tenox7/bloki:latest
+```
+
+Full site example:
+
+```sh
+docker run -d --restart=always \
+    -p 80:8080 \
+    -p 443:8443 \
+    -v /home/myuser/site:/site \
+    -v /home/myuser/bloki.secrets:/bloki.secrets \
+    tenox7/bloki:latest \
+    -site_name "My Blog" \
+    -subtitle "Blog about cool shit" \
+    -addr=:8443 \
+    -acm_addr :8080 \
+    -acm_host blog.mysite.net \
+    -secrets /bloki.secrets
+```
+
+## Auto SSL/TLS Certs / ACME / Lets Encrypt
 
 BloKi supports automatic certificate generation using Lets Encrypt / ACME. The keys and certs are stored
 in the secrets file. Simply add following flags:
@@ -73,7 +98,7 @@ bloki \
     ...
 ```
 
-### Customizing look and feel (templates)
+## Customizing look and feel (templates)
 
 By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel, create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
 
