@@ -175,7 +175,7 @@ func main() {
 		if secretsStore == nil {
 			log.Fatal("Unable to open secrets file")
 		}
-		log.Print("Opened secrets store")
+		log.Printf("Opened secrets store with %v keys", len(secretsStore.Keys()))
 	}
 
 	// manage users
