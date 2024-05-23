@@ -15,6 +15,7 @@ import (
 	"os/user"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"syscall"
@@ -37,7 +38,7 @@ var (
 	htmplDir = flag.String("template_subdir", "templates/", "directory holding html templates, relative to root dir")
 	chroot   = flag.Bool("chroot", false, "chroot to root dir, requires root")
 	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
-	suidUser = flag.String("setuid", "", "Username to setuid to if started as root")
+	suidUser = flag.String("setuid", "", "Username or uid:gid pair, to setuid to if started as root")
 	bindAddr = flag.String("addr", ":8080", "listener address, eg. :8080 or :443")
 	acmBind  = flag.String("acm_addr", "", "autocert manager listen address, eg: :80")
 	acmWhLst multiString
@@ -98,6 +99,14 @@ func atoiOrZero(s string) int {
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		return 0
+	}
+	return i
+}
+
+func atoiOrFatal(s string) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return i
 }
@@ -187,10 +196,18 @@ func main() {
 	// find uid/gid for setuid before chroot
 	var suid, sgid int
 	if *suidUser != "" {
-		suid, sgid, err = userId(*suidUser)
-		if err != nil {
-			log.Fatal("unable to find setuid user", err)
+		uidSm := regexp.MustCompile(`^(\d+):(\d+)$`).FindStringSubmatch(*suidUser)
+		switch len(uidSm) {
+		case 3:
+			suid = atoiOrFatal(uidSm[1])
+			sgid = atoiOrFatal(uidSm[2])
+		default:
+			suid, sgid, err = userId(*suidUser)
+			if err != nil {
+				log.Fatal("unable to find setuid user", err)
+			}
 		}
+		log.Printf("Requested setuid for %q suid=%v sgid=%v", *suidUser, suid, sgid)
 	}
 
 	// chroot
