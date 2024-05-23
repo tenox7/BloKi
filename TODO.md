@@ -5,9 +5,8 @@
 - user comments
   - accounts: ???
   - spam: https://akismet.com/
-- startup wizard
-- wiki mode
 - tags
+- wiki mode
 
 ## Core Engine
 
@@ -25,10 +24,9 @@
 
 ## Runtimes
 
-- docker container
+- fastcgi
 - cloud run, fargate
 - lambda, cloud functions
-- fastcgi
 
 ## Admin
 
@@ -48,3 +46,4 @@
 ## Tech Debt
 
 - "more" tag/continue reading refactor as ast node
+- author and pub/mod date also render by gomarkdown
