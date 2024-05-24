@@ -271,6 +271,7 @@ func (m post) save(file, postText string) (string, error) {
 	}
 	fullFilename := path.Join(*rootDir, *postsDir, path.Base(file))
 	log.Printf("Saving %q", fullFilename)
+	postText = strings.ReplaceAll(postText, "\r\n", "\n")
 	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
 	if err != nil {
 		return "", errors.New("unable to write temp file for %q: " + err.Error())
