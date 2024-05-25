@@ -1,4 +1,4 @@
-![theme](theme.png)
+![theme](kubrick.png)
 
 # BloKi - A minimalistic Blog and Wiki Engine
 
