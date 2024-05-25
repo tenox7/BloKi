@@ -89,6 +89,14 @@ docker run -d \
     -setuid $(id -u):$(id -g)
 ```
 
+## FastCGI
+
+Probably:
+
+```sh
+bloki -addr 127.0.0.1:9000 -fastcgi
+```
+
 ## Auto SSL/TLS Certs / ACME / Lets Encrypt
 
 BloKi supports automatic certificate generation using Lets Encrypt / ACME. The keys and certs are stored
@@ -105,11 +113,19 @@ bloki \
 
 ## Customizing look and feel (templates)
 
-By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel, create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit the `modern.html`. Modified templates will be picked up on start.
+By default BloKi ships with pre-built templates for convenience. If you want to customize your site look and feel, create a folder `site/templates`, download the [default template(s)](templates/) and customize them. If you don't care for old browsers just edit `modern.html`. Modified templates will be picked up on start.
 
 ![seveneleven](seveneleven.png)
 
-There also is a new "seven eleven" template. To install it, download [seveneleven.html](https://raw.githubusercontent.com/tenox7/BloKi/main/templates/seveneleven.html) as `site/templates/modern.html`. Also download the header image [seveneleven.jpg](https://raw.githubusercontent.com/tenox7/BloKi/main/templates/seveneleven.jpg) as `site/media/seveneleven.jpg`. Restart BloKi.
+There also is a new "seven eleven" template. Installation:
+
+```sh
+mkdir site/templates
+curl -Lo site/templates/modern.html https://raw.githubusercontent.com/tenox7/BloKi/main/templates/seveneleven.html
+curl -Lo site/media/seveneleven.jpg https://raw.githubusercontent.com/tenox7/BloKi/main/templates/seveneleven.jpg
+```
+
+Restart BloKi.
 
 ## Legal
 

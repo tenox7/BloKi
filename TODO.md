@@ -25,14 +25,14 @@
 
 ## Runtimes
 
-- fastcgi
 - cloud run, fargate, lambda, app runner, cloud functions
 - windows service, app-v
 
 ## Admin
 
 - better error messages than text
-  perhaps pass messages like for users.list()- 2fa for admin login
+  perhaps pass messages like for users.list()
+- 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
   https://www.twilio.com/docs/verify/quickstarts/totp

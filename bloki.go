@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/fcgi"
 	"net/url"
 	"os"
 	"path"
@@ -37,6 +38,7 @@ var (
 	secrets  = flag.String("secrets", "", "location of secrets file, outside of chroot/site dir")
 	suidUser = flag.String("setuid", "", "Username or uid:gid pair, to setuid to if started as root")
 	bindAddr = flag.String("addr", ":8080", "listener address, eg. :8080 or :443")
+	fastCgi  = flag.Bool("fastcgi", false, "enable FastCGI mode")
 	acmBind  = flag.String("acm_addr", "", "autocert manager listen address, eg: :80")
 	acmWhLst multiString
 )
@@ -263,7 +265,8 @@ func main() {
 	}
 
 	// http(s) bind stuff
-	if *acmBind != "" && *secrets != "" && len(acmWhLst) > 0 {
+	switch {
+	case *acmBind != "" && *secrets != "" && len(acmWhLst) > 0:
 		https := &http.Server{
 			Addr:      *bindAddr,
 			Handler:   http.DefaultServeMux,
@@ -271,7 +274,10 @@ func main() {
 		}
 		log.Print("Starting HTTPS TLS Server with ACM on ", *bindAddr)
 		err = https.ServeTLS(l, "", "")
-	} else {
+	case *fastCgi:
+		log.Print("Starting FastCGI Server")
+		fcgi.Serve(l, http.DefaultServeMux)
+	default:
 		log.Print("Starting plain HTTP Server")
 		err = http.Serve(l, http.DefaultServeMux)
 	}
