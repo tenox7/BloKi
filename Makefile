@@ -16,6 +16,8 @@ cross:
 	#GOOS=aix GOARCH=ppc64 go build -a -o bloki-ppc64-aix .
 	#GOOS=plan9 GOARCH=amd64 go build -a -o bloki-amd64-plan9 .
 	#GOOS=plan9 GOARCH=arm go build -a -o bloki-arm-plan9 .
+	GOOS=windows GOARCH=amd64 go build -a -o bloki-amd64-win64.exe
+	GOOS=windows GOARCH=arm64 go build -a -o bloki-arm64-win64.exe
 
 docker:
 	GOOS=linux GOARCH=amd64 go build -a -o bloki-amd64-linux .
