@@ -12,13 +12,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"os/user"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
-	"syscall"
 	"text/template"
 	"time"
 
@@ -120,37 +117,6 @@ func unescapeOrEmpty(s string) string {
 	return u
 }
 
-func userId(usr string) (int, int, error) {
-	u, err := user.Lookup(usr)
-	if err != nil {
-		return 0, 0, err
-	}
-	ui, err := strconv.Atoi(u.Uid)
-	if err != nil {
-		return 0, 0, err
-	}
-	gi, err := strconv.Atoi(u.Gid)
-	if err != nil {
-		return 0, 0, err
-	}
-	return ui, gi, nil
-}
-
-func setUid(ui, gi int) error {
-	if ui == 0 || gi == 0 {
-		return nil
-	}
-	err := syscall.Setgid(gi)
-	if err != nil {
-		return err
-	}
-	err = syscall.Setuid(ui)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 type multiString []string
 
 func (z *multiString) String() string {
@@ -194,31 +160,10 @@ func main() {
 	}
 
 	// find uid/gid for setuid before chroot
-	var suid, sgid int
-	if *suidUser != "" {
-		uidSm := regexp.MustCompile(`^(\d+):(\d+)$`).FindStringSubmatch(*suidUser)
-		switch len(uidSm) {
-		case 3:
-			suid = atoiOrFatal(uidSm[1])
-			sgid = atoiOrFatal(uidSm[2])
-		default:
-			suid, sgid, err = userId(*suidUser)
-			if err != nil {
-				log.Fatal("unable to find setuid user", err)
-			}
-		}
-		log.Printf("Requested setuid for %q suid=%v sgid=%v", *suidUser, suid, sgid)
-	}
+	suid, sgid := getSuidSgid()
 
-	// chroot
-	if *chroot {
-		err := syscall.Chroot(*rootDir)
-		if err != nil {
-			log.Fatal("chroot: ", err)
-		}
-		log.Print("Chroot to: ", *rootDir)
-		*rootDir = "/"
-	}
+	// chroot before setuid
+	chRoot()
 
 	// listen/bind to port before setuid
 	l, err := net.Listen("tcp", *bindAddr)
@@ -245,13 +190,7 @@ func main() {
 	}
 
 	// setuid now
-	if *suidUser != "" {
-		err = setUid(suid, sgid)
-		if err != nil {
-			log.Fatalf("unable to suid for %v: %v", *suidUser, err)
-		}
-		log.Printf("Setuid UID=%d GID=%d", os.Geteuid(), os.Getgid())
-	}
+	setUidGid(suid, sgid)
 
 	// check site, articles & media
 	st, err := os.Stat(*rootDir)
