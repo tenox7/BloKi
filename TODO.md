@@ -42,6 +42,7 @@
 - preview mode, render unpublished article with authentication
 - admin publish/unpublish button with bytes.Replace()
 - real dialogs instead of javascript popups
+- image resize
 
 ## Tech Debt
 
