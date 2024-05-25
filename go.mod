@@ -5,8 +5,9 @@ go 1.21.5
 require (
 	github.com/blevesearch/bleve/v2 v2.4.0
 	github.com/gomarkdown/markdown v0.0.0-20240419095408-642f0ee99ae2
-	github.com/tenox7/tkvs v1.0.0
+	github.com/tenox7/tkvs v1.0.1
 	golang.org/x/crypto v0.23.0
+	golang.org/x/term v0.20.0
 )
 
 require (
@@ -40,7 +41,8 @@ require (
 	go.etcd.io/bbolt v1.3.10 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/term v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect
 )
+
+replace github.com/blevesearch/mmap-go => ../mmap-go/
