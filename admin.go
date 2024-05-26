@@ -74,7 +74,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		case r.FormValue("newpost") != "":
 			adm.AdminTab, err = m.new(r.FormValue("newpost"), user)
 		case r.FormValue("save") != "":
-			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
+			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"), user)
 		case r.FormValue("search") != "":
 			adm.AdminTab, err = m.list(r.FormValue("query"))
 		default:
@@ -134,7 +134,7 @@ func (m post) new(file, user string) (string, error) {
 	}
 	_, err = m.save(file,
 		"<!--not-published=\""+time.Now().Format(timeFormat)+"\"-->\n"+
-			"<!--author=\""+user+"\"-->\n\n# New Post!\n\nHello world!\n\n")
+			"<!--author=\""+user+"\"-->\n\n# New Post!\n\nHello world!\n\n", user)
 	if err != nil {
 		log.Printf("Unable to save post %q: %v", file, err)
 		return "", err
@@ -265,7 +265,7 @@ func (post) list(query string) (string, error) {
 	return buf.String(), nil
 }
 
-func (m post) save(file, postText string) (string, error) {
+func (m post) save(file, postText, user string) (string, error) {
 	file = unescapeOrEmpty(file)
 	if file == "" {
 		return m.list("")
