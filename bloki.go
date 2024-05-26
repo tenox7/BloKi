@@ -206,16 +206,18 @@ func main() {
 	}
 	st, err = os.Stat(path.Join(*rootDir, *postsDir))
 	if os.IsNotExist(err) {
-		log.Print("articles did not exist, creating")
+		log.Print("Posts directory does not not exist, creating")
 		err = os.Mkdir(path.Join(*rootDir, *postsDir), 0755)
 		if err != nil {
 			log.Fatalf("Unable to create articles directory: %v", err)
 		}
-		err = os.WriteFile(
-			path.Join(*rootDir, *postsDir, "my-first-post.md"),
-			[]byte("<!--published=\""+time.Now().Format(timeFormat)+"\"-->\n\n# My first blog post!\n\nHello World!\n\n"),
-			0644,
-		)
+		gitInit()
+		idx.rescan()
+		txt.rescan()
+		po := post{}
+		_, err = po.save("my-first-post.md",
+			"<!--published=\""+time.Now().Format(timeFormat)+"\"-->\n\n"+
+				"# My first blog post!\n\nHello World!\n\n", "bloki")
 		if err != nil {
 			log.Fatalf("Unable to create first post: %v", err)
 		}
