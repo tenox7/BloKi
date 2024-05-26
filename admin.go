@@ -293,6 +293,7 @@ func (m post) save(file, postText, user string) (string, error) {
 	log.Printf("Saved post %q", file)
 	idx.update(file)
 	txt.update(file)
+	gitCommit(path.Join(*postsDir, path.Base(file)), "add", user)
 	return m.list("")
 }
 

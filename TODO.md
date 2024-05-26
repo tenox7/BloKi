@@ -44,3 +44,8 @@
 - admin publish/unpublish button with bytes.Replace()
 - real dialogs instead of javascript popups
 - image resize
+- users to have email addresses
+  change password
+  verification
+  git commit
+- git tab showing commit log, etc
