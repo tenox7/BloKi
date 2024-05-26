@@ -13,7 +13,8 @@
 - git integration
 - render node hook for /media/
 - wiki style links to post/media/etc
-- better error handling, use string builder
+- "more" tag/continue reading refactor as ast node
+- author and pub/mod date also render by gomarkdown
 - render to static site
 - render cache
 - throttle qps
@@ -43,8 +44,3 @@
 - admin publish/unpublish button with bytes.Replace()
 - real dialogs instead of javascript popups
 - image resize
-
-## Tech Debt
-
-- "more" tag/continue reading refactor as ast node
-- author and pub/mod date also render by gomarkdown
