@@ -119,10 +119,10 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	templates["admin"].Execute(w, adm)
 }
 
-func (m post) new(file string) (string, error) {
+func (p post) new(file string) (string, error) {
 	file = unescapeOrEmpty(file)
 	if file == "" || file == "null" {
-		return m.list("")
+		return p.list("")
 	}
 	file = path.Base(file)
 	if !strings.HasSuffix(file, ".md") {
@@ -132,60 +132,60 @@ func (m post) new(file string) (string, error) {
 	if err == nil {
 		return "", fmt.Errorf("new post file %q already exists", file)
 	}
-	_, err = m.save(file,
+	_, err = p.save(file,
 		"<!--not-published=\""+time.Now().Format(timeFormat)+"\"-->\n"+
-			"<!--author=\""+m.user+"\"-->\n\n# New Post!\n\nHello world!\n\n")
+			"<!--author=\""+p.user+"\"-->\n\n# New Post!\n\nHello world!\n\n")
 	if err != nil {
 		log.Printf("Unable to save post %q: %v", file, err)
 		return "", err
 	}
-	log.Printf("Created (%v) new post %q", m.user, file)
-	return m.edit(file)
+	log.Printf("Created (%v) new post %q", p.user, file)
+	return p.edit(file)
 }
 
-func (m post) delete(file string) (string, error) {
+func (p post) delete(file string) (string, error) {
 	file = path.Base(unescapeOrEmpty(file))
 	if file == "" {
-		return m.list("")
+		return p.list("")
 	}
-	err := gitDelete(path.Join(*postsDir, file), m.user)
+	err := gitDelete(path.Join(*postsDir, file), p.user)
 	if err != nil {
 		log.Printf("Unable to git delete post %q : %v", file, err)
 		return "", err
 	}
 	idx.delete(file)
 	txt.delete(file)
-	log.Printf("Deleted (%v) post %q", m.user, file)
-	return m.list("")
+	log.Printf("Deleted (%v) post %q", p.user, file)
+	return p.list("")
 }
 
-func (m post) rename(old, new string) (string, error) {
+func (p post) rename(old, new string) (string, error) {
 	old = path.Base(unescapeOrEmpty(old))
 	new = path.Base(unescapeOrEmpty(new))
 	if old == "" || new == "" {
-		return m.list("")
+		return p.list("")
 	}
 
 	if !strings.HasSuffix(new, ".md") {
 		new = new + ".md"
 	}
-	err := gitMove(path.Join(*postsDir, old), path.Join(*postsDir, new), m.user)
+	err := gitMove(path.Join(*postsDir, old), path.Join(*postsDir, new), p.user)
 	if err != nil {
 		log.Printf("Unable to rename post from %q to %q: %v", old, new, err)
 		return "", err
 	}
 	idx.rename(old, new)
 	txt.rename(old, new)
-	log.Printf("Renamed (%v) post %v to %v", m.user, old, new)
-	return m.list("")
+	log.Printf("Renamed (%v) post %v to %v", p.user, old, new)
+	return p.list("")
 }
 
 // perhaps we should have update in place, save and reopen
-func (m post) edit(file string) (string, error) {
+func (p post) edit(file string) (string, error) {
 	if file == "" {
-		return m.list("")
+		return p.list("")
 	}
-	data, err := m.load(file)
+	data, err := p.load(file)
 	if err != nil {
 		return "", errors.New("Unable to open " + file)
 	}
