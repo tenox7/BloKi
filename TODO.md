@@ -30,7 +30,7 @@
 
 ## Admin
 
-- in admin better error messages than text
+- better error messages than text
   perhaps route messages like for users.list()
 - 2fa for admin login
   https://github.com/pquerna/otp
