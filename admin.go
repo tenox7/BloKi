@@ -39,7 +39,7 @@ type AdminTemplate struct {
 }
 
 type post struct{ user string }
-type media struct{}
+type media struct{ user string }
 type creds struct{}
 type users struct{}
 
@@ -81,7 +81,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 			adm.AdminTab, err = m.list("")
 		}
 	case "media":
-		m := media{}
+		m := media{user: user}
 		adm.ActiveTab = "media"
 		switch {
 		case r.FormValue("rename") != "":
@@ -312,36 +312,40 @@ func (m media) upload(r *http.Request) (string, error) {
 		log.Printf("Unable to upload file %v", err)
 		return "", err
 	}
-	if h.Filename == "" {
+	file := path.Base(unescapeOrEmpty(h.Filename))
+	if file == "" {
 		return m.list()
 	}
-	o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(h.Filename))), os.O_RDWR|os.O_CREATE, 0644)
+	o, err := os.OpenFile(path.Join(*rootDir, *mediaDir, file), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Printf("Unable to upload file %q: %v", h.Filename, err)
+		log.Printf("Unable to upload file %q: %v", file, err)
 		return "", err
 	}
 	defer o.Close()
 	oSz, err := io.Copy(o, i)
 	if err != nil {
-		log.Printf("Unable to upload file %q: %v", h.Filename, err)
+		log.Printf("Unable to upload file %q: %v", file, err)
 		return "", err
 	}
 	if oSz != h.Size {
-		log.Printf("Unable to upload file %q: %v", h.Filename, err)
+		log.Printf("Unable to upload file %q: %v", file, err)
 		return "", err
 	}
-	log.Printf("Uploaded file %q, size: %v", h.Filename, h.Size)
+	log.Printf("Uploaded file %q, size: %v", file, h.Size)
+	err = gitAdd(path.Join(*mediaDir, path.Base(file)), m.user)
+	if err != nil {
+		log.Printf("Unable git add %v: %v", file, err)
+	}
 	return m.list()
 }
 
 func (m media) rename(old, new string) (string, error) {
+	old = path.Base(unescapeOrEmpty(old))
+	new = path.Base(unescapeOrEmpty(new))
 	if old == "" || new == "" {
 		return m.list()
 	}
-	err := os.Rename(
-		path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(old))),
-		path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(new))),
-	)
+	err := gitMove(path.Join(*mediaDir, old), path.Join(*mediaDir, new), m.user)
 	if err != nil {
 		log.Printf("Unable to rename media from %q to %q: %v", old, new, err)
 		return "", err
@@ -351,10 +355,11 @@ func (m media) rename(old, new string) (string, error) {
 }
 
 func (m media) delete(file string) (string, error) {
+	file = path.Base(unescapeOrEmpty(file))
 	if file == "" {
 		return m.list()
 	}
-	err := os.Remove(path.Join(*rootDir, *mediaDir, path.Base(unescapeOrEmpty(file))))
+	err := gitDelete(path.Join(*mediaDir, file), m.user)
 	if err != nil {
 		log.Printf("Unable to delete media %q: %v", file, err)
 		return "", err
@@ -371,7 +376,6 @@ func (media) list() (string, error) {
 	<INPUT TYPE="SUBMIT" NAME="delete" VALUE="Delete" ONCLICK="this.value=confirm('Are you sure you want to delete this image?');">
 	<INPUT TYPE="FILE" NAME="fileup">
 	<INPUT TYPE="SUBMIT" NAME="upload" VALUE="Upload">
-
 	<TABLE BORDER="0" CELLSPACING="10"><TR>
 	`)
 	m, err := os.ReadDir(path.Join(*rootDir, *mediaDir))
