@@ -38,7 +38,7 @@ type AdminTemplate struct {
 	CharSet   string
 }
 
-type post struct{}
+type post struct{ user string }
 type media struct{}
 type creds struct{}
 type users struct{}
@@ -62,7 +62,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 
 	switch r.FormValue("tab") {
 	case "posts", "":
-		m := post{}
+		m := post{user: user}
 		adm.ActiveTab = "posts"
 		switch {
 		case r.FormValue("edit") != "":
@@ -72,9 +72,9 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		case r.FormValue("delete") == "true":
 			adm.AdminTab, err = m.delete(r.FormValue("filename"))
 		case r.FormValue("newpost") != "":
-			adm.AdminTab, err = m.new(r.FormValue("newpost"), user)
+			adm.AdminTab, err = m.new(r.FormValue("newpost"))
 		case r.FormValue("save") != "":
-			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"), user)
+			adm.AdminTab, err = m.save(r.FormValue("filename"), r.FormValue("textdata"))
 		case r.FormValue("search") != "":
 			adm.AdminTab, err = m.list(r.FormValue("query"))
 		default:
@@ -119,7 +119,7 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	templates["admin"].Execute(w, adm)
 }
 
-func (m post) new(file, user string) (string, error) {
+func (m post) new(file string) (string, error) {
 	file = unescapeOrEmpty(file)
 	if file == "" || file == "null" {
 		return m.list("")
@@ -134,51 +134,49 @@ func (m post) new(file, user string) (string, error) {
 	}
 	_, err = m.save(file,
 		"<!--not-published=\""+time.Now().Format(timeFormat)+"\"-->\n"+
-			"<!--author=\""+user+"\"-->\n\n# New Post!\n\nHello world!\n\n", user)
+			"<!--author=\""+m.user+"\"-->\n\n# New Post!\n\nHello world!\n\n")
 	if err != nil {
 		log.Printf("Unable to save post %q: %v", file, err)
 		return "", err
 	}
-	log.Printf("Created new post %q", file)
+	log.Printf("Created (%v) new post %q", m.user, file)
 	return m.edit(file)
 }
 
 func (m post) delete(file string) (string, error) {
+	file = path.Base(unescapeOrEmpty(file))
 	if file == "" {
 		return m.list("")
 	}
-	file = path.Base(unescapeOrEmpty(file))
-	err := os.Remove(path.Join(*rootDir, *postsDir, file))
+	err := gitDelete(path.Join(*postsDir, file), m.user)
 	if err != nil {
-		log.Printf("Unable to delete post %q: %v", file, err)
+		log.Printf("Unable to git delete post %q : %v", file, err)
 		return "", err
 	}
 	idx.delete(file)
 	txt.delete(file)
-	log.Printf("Deleted post %q", file)
+	log.Printf("Deleted (%v) post %q", m.user, file)
 	return m.list("")
 }
 
 func (m post) rename(old, new string) (string, error) {
+	old = path.Base(unescapeOrEmpty(old))
+	new = path.Base(unescapeOrEmpty(new))
 	if old == "" || new == "" {
 		return m.list("")
 	}
-	old = path.Base(unescapeOrEmpty(old))
-	new = path.Base(unescapeOrEmpty(new))
+
 	if !strings.HasSuffix(new, ".md") {
 		new = new + ".md"
 	}
-	err := os.Rename(
-		path.Join(*rootDir, *postsDir, old),
-		path.Join(*rootDir, *postsDir, new),
-	)
+	err := gitMove(path.Join(*postsDir, old), path.Join(*postsDir, new), m.user)
 	if err != nil {
 		log.Printf("Unable to rename post from %q to %q: %v", old, new, err)
 		return "", err
 	}
 	idx.rename(old, new)
 	txt.rename(old, new)
-	log.Printf("Renamed post %v to %v", old, new)
+	log.Printf("Renamed (%v) post %v to %v", m.user, old, new)
 	return m.list("")
 }
 
@@ -203,7 +201,7 @@ func (m post) edit(file string) (string, error) {
 	return buf.String(), nil
 }
 
-// TODO: I think that edit should be default action on a post and view could be in a secondary column in the table?
+// TODO: edit should be default action on a post and view could be in a secondary column in the table?
 // or better no view rather preview from inside the post
 func (post) list(query string) (string, error) {
 	buf := strings.Builder{}
@@ -265,7 +263,7 @@ func (post) list(query string) (string, error) {
 	return buf.String(), nil
 }
 
-func (m post) save(file, postText, user string) (string, error) {
+func (m post) save(file, postText string) (string, error) {
 	file = unescapeOrEmpty(file)
 	if file == "" {
 		return m.list("")
@@ -293,7 +291,10 @@ func (m post) save(file, postText, user string) (string, error) {
 	log.Printf("Saved post %q", file)
 	idx.update(file)
 	txt.update(file)
-	gitCommit(path.Join(*postsDir, path.Base(file)), "add", user)
+	err = gitAdd(path.Join(*postsDir, path.Base(file)), m.user)
+	if err != nil {
+		log.Printf("Unable git add %v: %v", file, err)
+	}
 	return m.list("")
 }
 

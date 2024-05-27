@@ -39,6 +39,7 @@ var (
 	suidUser = flag.String("setuid", "", "Username or uid:gid pair, to setuid to if started as root")
 	bindAddr = flag.String("addr", ":8080", "listener address, eg. :8080 or :443")
 	fastCgi  = flag.Bool("fastcgi", false, "enable FastCGI mode")
+	useGit   = flag.Bool("use_git", true, "use git repo, enabled by default")
 	acmBind  = flag.String("acm_addr", "", "autocert manager listen address, eg: :80")
 	acmWhLst multiString
 )
@@ -211,13 +212,16 @@ func main() {
 		if err != nil {
 			log.Fatalf("Unable to create articles directory: %v", err)
 		}
-		gitInit()
+		err = gitInit()
+		if err != nil {
+			log.Printf("Unable to init git repo: %v", err)
+		}
 		idx.rescan()
 		txt.rescan()
-		po := post{}
+		po := post{user: "bloki"}
 		_, err = po.save("my-first-post.md",
 			"<!--published=\""+time.Now().Format(timeFormat)+"\"-->\n\n"+
-				"# My first blog post!\n\nHello World!\n\n", "bloki")
+				"# My first blog post!\n\nHello World!\n\n")
 		if err != nil {
 			log.Fatalf("Unable to create first post: %v", err)
 		}

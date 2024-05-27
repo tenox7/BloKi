@@ -49,3 +49,4 @@
   verification
   git commit
 - git tab showing commit log, etc
+- cleanup path names, short, full, unesacped, escaped, etc
