@@ -71,7 +71,7 @@ Hello world:
 docker run -it --rm -p 8080:8080 -v /home/tenox/site:/site tenox7/bloki:latest
 ```
 
-Full site example:
+Full site example with auto SSL/TLS cert:
 
 ```sh
 docker run -d \
@@ -88,7 +88,7 @@ docker run -d \
     -acm_host blog.mysite.net \
     -secrets /bloki.secrets \
     -chroot
-    -setuid $(id -u):$(id -g)
+    -setuid 1000:1000
 ```
 
 ## FastCGI
