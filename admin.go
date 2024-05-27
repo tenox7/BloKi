@@ -143,6 +143,49 @@ func (p post) new(file string) (string, error) {
 	return p.edit(file)
 }
 
+func (m post) save(file, postText string) (string, error) {
+	file = unescapeOrEmpty(file)
+	if file == "" {
+		return m.list("")
+	}
+	fullFilename := path.Join(*rootDir, *postsDir, path.Base(file))
+	log.Printf("Saving %q", fullFilename)
+	if runtime.GOOS != "windows" {
+		postText = strings.ReplaceAll(postText, "\r\n", "\n")
+	}
+	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
+	if err != nil {
+		return "", errors.New("unable to write temp file for %q: " + err.Error())
+	}
+	st, err := os.Stat(fullFilename + ".tmp")
+	if err != nil {
+		return "", errors.New("unable to stat temp file for %q: " + err.Error())
+	}
+	if st.Size() != int64(len(postText)) {
+		return "", errors.New("temp file size != input size")
+	}
+	err = os.Rename(fullFilename+".tmp", fullFilename)
+	if err != nil {
+		return "", errors.New("unable to rename temp file to the target file: " + err.Error())
+	}
+	log.Printf("Saved post %q", file)
+	idx.update(file)
+	txt.update(file)
+	err = gitAdd(path.Join(*postsDir, path.Base(file)), m.user)
+	if err != nil {
+		log.Printf("Unable git add %v: %v", file, err)
+	}
+	return m.list("")
+}
+
+func (p post) load(file string) (string, error) {
+	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(file))))
+	if err != nil {
+		return "", errors.New("unable to read " + file + " : " + err.Error())
+	}
+	return html.EscapeString(string(f)), nil
+}
+
 func (p post) delete(file string) (string, error) {
 	file = path.Base(unescapeOrEmpty(file))
 	if file == "" {
@@ -261,49 +304,6 @@ func (post) list(query string) (string, error) {
 
 	buf.WriteString("</TABLE>\n")
 	return buf.String(), nil
-}
-
-func (m post) save(file, postText string) (string, error) {
-	file = unescapeOrEmpty(file)
-	if file == "" {
-		return m.list("")
-	}
-	fullFilename := path.Join(*rootDir, *postsDir, path.Base(file))
-	log.Printf("Saving %q", fullFilename)
-	if runtime.GOOS != "windows" {
-		postText = strings.ReplaceAll(postText, "\r\n", "\n")
-	}
-	err := os.WriteFile(fullFilename+".tmp", []byte(postText), 0644)
-	if err != nil {
-		return "", errors.New("unable to write temp file for %q: " + err.Error())
-	}
-	st, err := os.Stat(fullFilename + ".tmp")
-	if err != nil {
-		return "", errors.New("unable to stat temp file for %q: " + err.Error())
-	}
-	if st.Size() != int64(len(postText)) {
-		return "", errors.New("temp file size != input size")
-	}
-	err = os.Rename(fullFilename+".tmp", fullFilename)
-	if err != nil {
-		return "", errors.New("unable to rename temp file to the target file: " + err.Error())
-	}
-	log.Printf("Saved post %q", file)
-	idx.update(file)
-	txt.update(file)
-	err = gitAdd(path.Join(*postsDir, path.Base(file)), m.user)
-	if err != nil {
-		log.Printf("Unable git add %v: %v", file, err)
-	}
-	return m.list("")
-}
-
-func (post) load(file string) (string, error) {
-	f, err := os.ReadFile(path.Join(*rootDir, *postsDir, path.Base(unescapeOrEmpty(file))))
-	if err != nil {
-		return "", errors.New("unable to read " + file + " : " + err.Error())
-	}
-	return html.EscapeString(string(f)), nil
 }
 
 func (m media) upload(r *http.Request) (string, error) {
