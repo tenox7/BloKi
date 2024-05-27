@@ -42,7 +42,7 @@ func gitAdd(file, user string) error {
 	if err != nil {
 		return fmt.Errorf("unable to add git file %v: %v", file, err)
 	}
-	hash, err := wt.Commit("User "+user+" modified file "+file, &git.CommitOptions{
+	hash, err := wt.Commit("User "+user+" modified "+file, &git.CommitOptions{
 		Author: &object.Signature{
 			Name: user,
 			When: time.Now(),
@@ -71,7 +71,7 @@ func gitDelete(file, user string) error {
 	if err != nil {
 		return fmt.Errorf("unable to delete git file %v: %v", file, err)
 	}
-	hash, err := wt.Commit("User "+user+" deleted file "+file, &git.CommitOptions{
+	hash, err := wt.Commit("User "+user+" deleted "+file, &git.CommitOptions{
 		Author: &object.Signature{
 			Name: user,
 			When: time.Now(),
@@ -101,7 +101,7 @@ func gitMove(old, new, user string) error {
 	if err != nil {
 		return fmt.Errorf("unable to move  %v -> %v: %v", old, new, err)
 	}
-	hash, err := wt.Commit("User "+user+" renamed file "+old+" to "+new, &git.CommitOptions{
+	hash, err := wt.Commit("User "+user+" renamed "+old+" to "+new, &git.CommitOptions{
 		Author: &object.Signature{
 			Name: user,
 			When: time.Now(),
