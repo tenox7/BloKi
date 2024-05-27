@@ -25,8 +25,8 @@ func gitInit() error           { return nil }
 func gitCommit(_, _, _ string) {}
 func gitAdd(_, _ string) error { return nil }
 func gitDelete(file, _ string) error {
-	return os.Remove(path.Join(*rootDir, *postsDir, file))
+	return os.Remove(path.Join(*rootDir, file))
 }
 func gitMove(old, new, _ string) error {
-	return os.Rename(path.Join(*rootDir, *postsDir, old), path.Join(*rootDir, *postsDir, new))
+	return os.Rename(path.Join(*rootDir, old), path.Join(*rootDir, new))
 }
