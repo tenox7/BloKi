@@ -22,6 +22,8 @@ If you are looking for a small, simple, easy to use,  micro blog/wiki platform t
 
 - Basic blog engine and admin UI works.
 - Search, pagination, markdown, images, etc.
+- Git support.
+- MacOS, Linux, *BSD, AIX, Windows and Plan9 support.
 - You can see a working example on [dogfood blog](https://blog.tenox.net/)
 
 ## Running BloKi
