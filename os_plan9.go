@@ -6,6 +6,7 @@ package main
 import (
 	"os"
 	"path"
+	"time"
 )
 
 func userId(_ string) (int, int, error) { return 0, 0, nil }
@@ -31,6 +32,10 @@ func gitMove(old, new, _ string) error {
 	return os.Rename(path.Join(*rootDir, old), path.Join(*rootDir, new))
 }
 
-type commitList struct{}
+type commitList struct {
+	author  string
+	time    time.Time
+	message string
+}
 
 func gitList() ([]commitList, error) { return nil, nil }

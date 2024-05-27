@@ -30,8 +30,8 @@
 
 ## Admin
 
-- better error messages than text
-  perhaps pass messages like for users.list()
+- in admin better error messages than text
+  perhaps route messages like for users.list()
 - 2fa for admin login
   https://github.com/pquerna/otp
   https://github.com/xlzd/gotp
