@@ -30,3 +30,7 @@ func gitDelete(file, _ string) error {
 func gitMove(old, new, _ string) error {
 	return os.Rename(path.Join(*rootDir, old), path.Join(*rootDir, new))
 }
+
+type commitList struct{}
+
+func gitList() ([]commitList, error) { return nil, nil }

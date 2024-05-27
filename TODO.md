@@ -10,7 +10,6 @@
 
 ## Core Engine
 
-- git integration: rename, delete, images
 - render node hook for /media/
 - wiki style links to post/media/etc
 - "more" tag/continue reading refactor as ast node

@@ -42,6 +42,7 @@ type post struct{ user string }
 type media struct{ user string }
 type creds struct{}
 type users struct{}
+type gitcl struct{}
 
 func handleAdmin(w http.ResponseWriter, r *http.Request) {
 	var err error
@@ -106,6 +107,10 @@ func handleAdmin(w http.ResponseWriter, r *http.Request) {
 		default:
 			adm.AdminTab, err = m.list("")
 		}
+	case "git":
+		g := gitcl{}
+		adm.ActiveTab = "git"
+		adm.AdminTab, err = g.list("")
 	default:
 		adm.AdminTab = "<H1>Not Implemented</H1><P>"
 	}
@@ -404,6 +409,32 @@ func (media) list() (string, error) {
 			<INPUT TYPE="radio" NAME="filename" VALUE="` + un + `">
 			<A HREF="/media/` + un + `">` + nm + `</A></TD>
 		`)
+	}
+	buf.WriteString("</TR></TABLE>\n")
+	return buf.String(), nil
+}
+
+func (g gitcl) list(msg string) (string, error) {
+	if msg != "" {
+		msg = msg + "<P>\n"
+	}
+	buf := strings.Builder{}
+	buf.WriteString(`<H1>Git Commit Log</H1>
+	` + msg + `
+	<INPUT TYPE="HIDDEN" NAME="tab" VALUE="git">
+	<P>
+	<TABLE WIDTH="100%" BGCOLOR="#FFFFFF" CELLPADDING="10" CELLSPACING="0" BORDER="0">
+	<TR ALIGN="LEFT"><TH>Author</TH><TH>Time</TH><TH>Message</MH></TR>
+	`)
+	cl, err := gitList()
+	if err != nil {
+		return "", err
+	}
+	for i, c := range cl {
+		buf.WriteString("<TR BGCOLOR=\"" + bgf[i%2 == 0] + "\">" +
+			"<TD>" + c.author + "</TD>" +
+			"<TD>" + c.time.String() + "</TD>" +
+			"<TD>" + c.message + "</TD></TR>\n")
 	}
 	buf.WriteString("</TR></TABLE>\n")
 	return buf.String(), nil

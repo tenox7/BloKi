@@ -40,9 +40,9 @@ func gitAdd(file, user string) error {
 	}
 	_, err = wt.Add(file)
 	if err != nil {
-		return fmt.Errorf("unable to add git file %v: %v", file, err)
+		return fmt.Errorf("unable to add git%v: %v", file, err)
 	}
-	hash, err := wt.Commit("User "+user+" modified file "+file, &git.CommitOptions{
+	hash, err := wt.Commit("User "+user+" modified"+file, &git.CommitOptions{
 		Author: &object.Signature{
 			Name: user,
 			When: time.Now(),
@@ -69,9 +69,9 @@ func gitDelete(file, user string) error {
 	}
 	_, err = wt.Remove(file)
 	if err != nil {
-		return fmt.Errorf("unable to delete git file %v: %v", file, err)
+		return fmt.Errorf("unable to delete git%v: %v", file, err)
 	}
-	hash, err := wt.Commit("User "+user+" deleted file "+file, &git.CommitOptions{
+	hash, err := wt.Commit("User "+user+" deleted"+file, &git.CommitOptions{
 		Author: &object.Signature{
 			Name: user,
 			When: time.Now(),
@@ -101,7 +101,7 @@ func gitMove(old, new, user string) error {
 	if err != nil {
 		return fmt.Errorf("unable to move  %v -> %v: %v", old, new, err)
 	}
-	hash, err := wt.Commit("User "+user+" renamed file "+old+" to "+new, &git.CommitOptions{
+	hash, err := wt.Commit("User "+user+" renamed"+old+" to "+new, &git.CommitOptions{
 		Author: &object.Signature{
 			Name: user,
 			When: time.Now(),
@@ -112,4 +112,37 @@ func gitMove(old, new, user string) error {
 	}
 	log.Printf("Git Rename: user=%v old=%v new=%v commit=%v", user, old, new, hash)
 	return nil
+}
+
+type commitList struct {
+	author  string
+	time    time.Time
+	message string
+}
+
+func gitList() ([]commitList, error) {
+	if !*useGit {
+		return nil, nil
+	}
+	gr, err := git.PlainOpen(*rootDir)
+	if err != nil {
+		return nil, fmt.Errorf("unable to open git repo: %v", err)
+	}
+	ref, err := gr.Head()
+	if err != nil {
+		return nil, fmt.Errorf("unable to get head: %v", err)
+	}
+	iter, err := gr.Log(&git.LogOptions{From: ref.Hash()})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get commit log: %v", err)
+	}
+	cl := []commitList{}
+	err = iter.ForEach(func(c *object.Commit) error {
+		cl = append(cl, commitList{author: c.Author.String(), time: c.Committer.When, message: c.Message})
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("unable to iterate through commit log: %v", err)
+	}
+	return cl, nil
 }
