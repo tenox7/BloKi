@@ -21,7 +21,9 @@
 - reindex on inotify (incl rename/move)
 - reindex on signal
 - gcs, s3 support
-- aix, plan9 support
+- smart resize images for preview
+  if only slightly larger than theme use img src size
+  otherwise generate a preview version and cache on disk
 
 ## Runtimes
 
@@ -42,7 +44,8 @@
 - preview mode, render unpublished article with authentication
 - admin publish/unpublish button with bytes.Replace()
 - real dialogs instead of javascript popups
-- image resize
+- alert on image size - over certain file size
+- image resize: imaginary, bimg, disintegration
 - users to have email addresses
   change password
   verification

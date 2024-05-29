@@ -22,7 +22,7 @@ cross:
 docker:
 	GOOS=linux GOARCH=amd64 go build -a -o bloki-amd64-linux .
 	GOOS=linux GOARCH=arm64 go build -a -o bloki-arm64-linux .
-	docker buildx build --platform linux/amd64,linux/arm64 -t tenox7/bloki:latest --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t tenox7/bloki:dogfood --push .
 
 clean:
 	rm -f bloki-* bloki
