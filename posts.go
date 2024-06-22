@@ -41,6 +41,7 @@ func renderMd(md []byte, name, published string) string {
 					return ast.GoToNext, false
 				}
 				if !entering {
+					// TODO: we could potentially use https://github.com/abhinav/goldmark-anchor instead
 					io.WriteString(w, "</a></h1>\n\n<i>"+published+"</i>\n\n")
 					return ast.GoToNext, true
 				}

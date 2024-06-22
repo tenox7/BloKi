@@ -7,6 +7,8 @@
   - spam: https://akismet.com/
 - tags
 - wiki mode
+- consider switching to goldmark, see extensions like wiki mode links, etc
+  https://github.com/yuin/goldmark?tab=readme-ov-file#extensions
 
 ## Core Engine
 
